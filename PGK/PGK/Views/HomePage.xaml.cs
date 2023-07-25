@@ -107,7 +107,7 @@ namespace PGK.Views
             // Create search node
             allNodes.Add(ViewProcessor.CreateSearchBarNode());
         }
-        public async void DisplayPage()
+        public void DisplayPage()
         {
             OnAppearing();
         }

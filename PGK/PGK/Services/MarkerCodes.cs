@@ -15,16 +15,9 @@ namespace PGK.Services
         public static string[] linkMarker, linkOutMarker; 
 
         public static string[] ff, fl, fi, singleQuote, doubleQuote, Dash;
-        public MarkerCodes()
-        {
-            StreamReader sr = new StreamReader(Android.App.Application.Context.Assets.Open("Commands.tex"));
-            while (!sr.EndOfStream)
-            {
-                string line = sr.ReadLine();
-                ExtractCodes(line);
-            }
-        }
-        private void ExtractCodes(string line)
+        public MarkerCodes() { }
+
+        public static void ExtractCodes(string line)
         {
             string preCode = "%\\";
             if (!line.Contains(preCode)) return;
@@ -64,7 +57,7 @@ namespace PGK.Services
                 case "apostrophe": apostrophe = new string[] { codePair[1], "'" }; break;
             }            
         }
-        private string[] translateAcode(string line)
+        private static string[] translateAcode(string line)
         {
             return line.Split(',');
         }

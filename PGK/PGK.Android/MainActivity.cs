@@ -31,8 +31,13 @@ namespace PGK.Droid
             DebugPage.AppendLine("MainActivity.OnCreate App.extractFromAsset:" + App.extractFromAsset);
 
             // Create marker codes from Command.tex
-            MarkerCodes markerCodes = new MarkerCodes(); 
-            
+            StreamReader sr = new StreamReader(Android.App.Application.Context.Assets.Open("Commands.tex"));
+            while (!sr.EndOfStream)
+            {
+                string line = sr.ReadLine();
+                MarkerCodes.ExtractCodes(line);
+            }
+
             if (App.extractFromAsset)
             {
                 App.extractFromAsset = false;

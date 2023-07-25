@@ -48,8 +48,8 @@
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
     <BundleAssemblies>false</BundleAssemblies>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
-	<AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
-	<AndroidUseAssemblyStore>false</AndroidUseAssemblyStore>
+    <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
+    <AndroidUseAssemblyStore>false</AndroidUseAssemblyStore>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Android" />
