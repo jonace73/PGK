@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System.Threading.Tasks;
 using Xamarin.UITest;
 
 namespace PGKUITest
@@ -23,7 +24,19 @@ namespace PGKUITest
         [Test]
         public void TestPGK()
         {
-            int x = 0;
+            // Rotating disk
+            Task.Delay(3000);
+            app.Screenshot("Rotating disk");
+
+            // Search results
+            Task.Delay(7000);
+            string searchBar = "SearchBar";
+            app.WaitForElement(c => c.Marked(searchBar));
+            app.ClearText(x => x.Marked(searchBar));
+            string keyword = "father";
+            app.EnterText((x => x.Marked(searchBar)), keyword);
+            Task.Delay(3000);
+            app.Screenshot("Search result for: " + keyword); 
         }
     }
 }
