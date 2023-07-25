@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="PGK.Views.DivinePage"
+    NavigationPage.HasNavigationBar="false"
+    BackgroundImageSource="@drawable/SkyNarrow">
+
+    <!-- Header -->
+    <Shell.TitleView>
+        <StackLayout Orientation="Horizontal" Margin="0">
+            <Image x:Name="backArrow" Source="@drawable/BackArrow.png" HorizontalOptions="Start" IsVisible="false">
+                <Image.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnTapBackArrow" />
+                </Image.GestureRecognizers>
+            </Image>
+            <Image Source="@drawable/LogoPGK.png" />
+            <Label Text="Proclaim God's Kingdom" VerticalOptions="Center" HorizontalOptions="End"  TextColor="White" FontSize="Large" />
+        </StackLayout>
+    </Shell.TitleView>
+
+</ContentPage>

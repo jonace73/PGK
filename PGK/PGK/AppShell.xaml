@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Shell xmlns="http://xamarin.com/schemas/2014/forms" 
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:views="clr-namespace:PGK.Views"
+       Title="PGK"
+       x:Class="PGK.AppShell">
+
+    <!-- Style Shell elements -->
+    <Shell.Resources>
+        <Style x:Key="BaseStyle" TargetType="Element">
+            <Setter Property="Shell.BackgroundColor" Value="{StaticResource AppPrimaryColor}" />
+            <Setter Property="Shell.ForegroundColor" Value="{StaticResource SecondaryColor}" />
+            <Setter Property="Shell.TitleColor" Value="{StaticResource SecondaryColor}" />
+            <Setter Property="Shell.TabBarUnselectedColor" Value="#95FFFFFF"/>
+        </Style>
+        <Style TargetType="TabBar" BasedOn="{StaticResource BaseStyle}" />
+    </Shell.Resources>
+
+    <!-- Bottom menu -->
+    <TabBar x:Name="AppTabBar">
+        <ShellContent
+            x:Name="UpdateShell"
+            IsVisible="False"
+            ContentTemplate="{DataTemplate views:UpdatePage}" />
+        <ShellContent Title="Home"
+            x:Name="HomeShell"
+            IsVisible="False"
+            Icon="HomeIconX.png"
+            ContentTemplate="{DataTemplate views:HomePage}" />
+        <ShellContent Title="Divine"
+            x:Name="DivineShell"
+            IsVisible="False"
+            Icon="DivineIconX.png"
+            ContentTemplate="{DataTemplate views:DivinePage}" />
+        <ShellContent Title="Authority"
+            x:Name="StructureShell"
+            IsVisible="False"
+            Icon="StructureIconX.png"
+            ContentTemplate="{DataTemplate views:StructurePage}" />
+        <ShellContent Title="Beliefs"     
+            x:Name="BeliefsShell"
+            IsVisible="False"   
+            Icon="BeliefsIconX.png"
+            ContentTemplate="{DataTemplate views:BeliefsPage}" />
+        <ShellContent Title="Social"
+            x:Name="SocialIssuesShell"
+            IsVisible="False"
+            Icon="SocialIssuesIconX.png"
+            ContentTemplate="{DataTemplate views:SocialIssuesPage}" />
+        <ShellContent Title="Debug"
+            x:Name="DebugShell"
+            Icon="DebugIconX.png"
+            ContentTemplate="{DataTemplate views:DebugPage}" />
+    </TabBar>
+
+</Shell>

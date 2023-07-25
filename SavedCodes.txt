@@ -1,0 +1,31 @@
+
+        public void GoHome()
+        {
+            DebugPage.AppendLine("AppShell.GoHome");
+            Current.CurrentItem = rootPathToShellDictionary["Home"];
+
+            OnAppearing();
+        }
+
+        public bool IsHomePageFrame(Frame tappedHeaderFrame)
+        {
+            StackLayout innerLayout = tappedHeaderFrame.Parent as StackLayout;
+            Frame nodeFrame = innerLayout.Parent as Frame;
+            StackLayout pageLayout = nodeFrame.Parent as StackLayout;
+            ScrollView scrollView = pageLayout.Parent as ScrollView;
+            return scrollView.Parent is HomePage;
+        }
+====================================================================================================================
+
+
+            // Find all nodes in DB with the same seedPath
+            string pathSeed = ExtractPathSeed(this.LeafTag);
+            List<Node> nodes = await NodeDatabase.DBnodes.GetBranchesAsync(pathSeed);
+
+            // 2. Fill rootPath.scratchNodeFrameDB
+            string root = Node.ExtractPathRoot(this.LeafTag);
+            ScratchNodeFramesReset(root);
+
+            // 3. Set useScratchDB = true AND showBackArrow = true if node is not root SET paths
+            SetBackArrow(root,!IsRoot(LeafTag));
+            SavePaths();

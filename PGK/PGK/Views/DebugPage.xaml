@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="PGK.Views.DebugPage"
+    NavigationPage.HasNavigationBar="false"
+    BackgroundImageSource="@drawable/SkyNarrow">
+
+    <!-- Header -->
+    <Shell.TitleView>
+        <StackLayout Orientation="Horizontal" Margin="0">
+            <Image Source="@drawable/LogoPGK.png" HorizontalOptions="Start"/>
+            <Label Text="Proclaim God's Kingdom" TextColor="White" FontSize="Large" VerticalOptions="Center"/>
+        </StackLayout>
+    </Shell.TitleView>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Erase" Clicked="OnEraseMsgsClicked" />
+        <ToolbarItem Text="Copy" Clicked="OnCopyMsgsClicked" />
+    </ContentPage.ToolbarItems>
+
+    <!-- Pad -->
+    <StackLayout Orientation="Vertical" Margin="0">
+        <StackLayout Orientation="Horizontal" Margin="0">
+            <Label Text="Height per line:"  Margin="5,5,5,0" FontSize="Medium"/>
+            <Editor x:Name="HeightPerLine" Placeholder ="1" Margin="5,5,5,0" />
+            <Button Text="Save" Clicked="OnSaveHeightPerLine" Margin="5" />
+        </StackLayout>
+        <ScrollView>
+            <Editor  x:Name="DebuggingOutputs" Text="" IsReadOnly="true" />
+        </ScrollView>
+    </StackLayout>
+</ContentPage>
