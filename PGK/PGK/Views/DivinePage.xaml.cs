@@ -56,7 +56,7 @@ namespace PGK.Views
             App.globalPath = pathSeed;
 
             // Create the contents of this page
-            ScrollView scrollView = await ViewProcessor.CreateContent(pathSeed);
+            ScrollView scrollView = await ViewProcessor.CreatePageContent(pathSeed);
 
             if (scrollView != null)
             {

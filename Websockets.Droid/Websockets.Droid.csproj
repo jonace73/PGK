@@ -69,12 +69,6 @@
   <ItemGroup>
     <EmbeddedReferenceJar Include="Jars\androidasync-2.1.6.jar" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Websockets\Websockets.csproj">
-      <Project>{91ea9235-c355-473f-a6bb-7b29fd2e3af1}</Project>
-      <Name>Websockets</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.Bindings.targets" />
   <Import Project="..\packages\NETStandard.Library.2.0.0\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('..\packages\NETStandard.Library.2.0.0\build\netstandard2.0\NETStandard.Library.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

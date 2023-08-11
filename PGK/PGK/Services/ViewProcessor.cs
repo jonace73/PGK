@@ -328,26 +328,7 @@ namespace PGK.Services
             return heightToAdd;
         }
 
-        //============================= ELEMENT CREATION =========================================
-        public static Node CreateRetransmitNode()
-        {
-            Node node = new Node();
-            node.Keyword = UpdatePage.retransmitKeyword;
-            node.Header = "Please click this node to download information cut due to connection error.";
-            node.nodeType = NodeType.Answer;
-
-            return node;
-        }
-        public static Node CreateSearchBarNode()
-        {
-            Node node = new Node();
-            node.Keyword = "Search";
-            node.Header = "Please click this node to search your desired keyword.";
-            node.nodeType = NodeType.SearchBar;
-
-            return node;
-        }
-        public static async Task<ScrollView> CreateContent(string pathSeed)
+        public static async Task<ScrollView> CreatePageContent(string pathSeed)
         {
 
             // Retrieve then display nodes. DON'T put await inside NodesToScrollView. OTHERWISE, some nodes will not appear
@@ -366,8 +347,7 @@ namespace PGK.Services
         //============================= ELEMENT PROCESSING =========================================
         public static string ExtractKeyword(string leafTag)
         {
-            return leafTag.Split(MarkerCodes.segmentSeparator).Last() + MarkerCodes.keyDelimiter;
-
+            return leafTag.Split(MarkerCodes.segmentSeparator).Last();
         }
         public static string GetKeywordNode(Frame nodeFrame)
         {

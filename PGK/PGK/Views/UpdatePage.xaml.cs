@@ -4,6 +4,9 @@ using PGK.Models;
 using PGK.Services;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -15,9 +18,10 @@ namespace PGK.Views
     {
         public static bool isDownloadFromServer = true;
         public static bool isUpdateOnGoing = true;
-        public static bool transmissionError = false;
+        public static bool isTransmissionInError = false;
         public static string retransmitKeyword = "Retransmit";
         public static string appID;
+        public static string URI = "https://whizkod.com/PGK/HttpPHP/RxPost.php";
         public static string AppID
         {
             get
@@ -32,19 +36,34 @@ namespace PGK.Views
         // Month is ONE-BASED
         public static DateTime appLastUpdateTime = new DateTime(2023, 01, 01, 00, 00, 00);
         public static DateTime appLastCheckTime = new DateTime(2023, 01, 01, 00, 00, 00);
-        public static DateTime appLastIPchangeTime = new DateTime(2023, 01, 01, 00, 00, 00);
 
         public UpdatePage()
         {
             InitializeComponent();
         }
-        protected override void OnAppearing()
+        protected async override void OnAppearing()
         {
             base.OnAppearing();
 
             DebugPage.AppendLine("UpdatePage.OnAppearing isDownloadFromServer: " + isDownloadFromServer);
+
+            // Rotate image. DON'T WAIT
             RotateImage();
-            if (isDownloadFromServer) DownloadFromServer();
+
+            // If not downloading from server return
+            if (!isDownloadFromServer) return;
+
+            // Download from server
+            try
+            {
+                await DownloadFromServer();
+                isUpdateOnGoing = false;
+            }
+            catch (Exception ex)
+            {
+                DebugPage.AppendLine("UpdatePage.OnAppearing ERROR: " + ex.Message);
+                isTransmissionInError = true;
+            }
         }
         public async Task<int> RotateImage()
         {
@@ -54,7 +73,7 @@ namespace PGK.Views
             DebugPage.AppendLine("UpdatePage.RotateImage.");
 
             int ii = 0;
-            while (isUpdateOnGoing && !transmissionError)
+            while (isUpdateOnGoing && !isTransmissionInError)
             {
                 // 10/T = 360/N => T = 1000N/36 msec. For N = 1 sec T = 27.7 ~ 30 msec
                 await BlessedTrinityImage.RotateTo(10 * (ii++), 30);
@@ -69,56 +88,90 @@ namespace PGK.Views
 
             // Leave UpdatePage, i.e., show Home
             var AppShellInstance = Xamarin.Forms.Shell.Current as AppShell;
-            AppShellInstance.LeaveUpdate();
+            AppShellInstance.LeaveUpdatePage();
 
             return 0;
         }
         public async Task<int> DownloadFromServer()
         {
             // Send message
-            DebugPage.AppendLine("UpdatePage.DownloadFromServer.");
-            string msg = JsonMsgToServer("phoneRequestUpdate", DateTimeToStringOneBased(appLastUpdateTime));
-            await DependencyService.Get<ICommWithServer>().SendByDependency(msg, "ACKphoneRequestUpdate");
+            DebugPage.AppendLine("UpdatePage.DownloadFromServer appLastUpdateTime: " + DateTimeToStringOneBased(appLastUpdateTime));
+            using (var client = new HttpClient())
+            {
+                // Create a new post
+                var novoPost = new Post
+                {
+                    signalType = "Update",
+                    lastClientUpdateDate = DateTimeToStringOneBased(appLastUpdateTime)
+                };
+
+                // create the request content and define Json  
+                var json = JsonConvert.SerializeObject(novoPost);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                //  send a POST request
+                var uri = URI;
+                var result = await client.PostAsync(uri, content);
+
+                // on error throw a exception  
+                result.EnsureSuccessStatusCode();
+
+                // handling the answer  
+                var resultString = await result.Content.ReadAsStringAsync();
+                Post post = JsonConvert.DeserializeObject<Post>(resultString);
+
+                // Process post
+                await ProcessReceivedPost(post);
+            }
 
             return 0;
         }
-        public static string JsonMsgToServer(string type, string timeStamp)
+        private async Task<bool> ProcessReceivedPost(Post post)
         {
-            // One-off Username
-            return JsonConvert.SerializeObject(new { Type = type, TimeStamp = timeStamp, Username = AppID });
+            DebugPage.AppendLine("UpdatePage.ProcessReceivedPost numberNodes: " + post.numberNodes);
+            if (post.numberNodes == 0) return true;
+
+            // Set appLastUpdateTime
+            appLastUpdateTime = StringToDateTime(post.lastClientUpdateDate);
+
+            // Extract new nodes 
+            await ExtractNodes(post.Nodes);
+
+            return true;
         }
         public static async Task<int> ExtractNodes(string serverMsg)
         {
-            // ALGO: Extract nodes then stop rotating image
-            //DebugPage.AppendLine("UpdatePage.ExtractNodes");
-
             string[] result = serverMsg.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             List<Node> nodes = new List<Node>();
-            if (result.Length == 1) return 0;
 
-            // If there are nodes
             int count = 0;
             foreach (string str in result)
             {
-                // Skip header
-                if (count > 0)
-                {/*/ Result 24/05/2023 11:59: 51 AM
-                  * This matches with the RESULTs of MainActivity.ExtractOrigDBsetUpdateTime()
-                    Node node = Node.ServerStringToNode(str);
-                    DateTime date = UpdatePage.StringToDateTime(node.DateUpdated);
-                    DebugPage.AppendLine("ExtractNodes date: " + date);//*/
-
-                    nodes.Add(ViewProcessor.LineFromServerToNode(str));
+                Node node = ViewProcessor.LineFromServerToNode(str);
+                if (node.Keyword.Equals("URIchange"))
+                {
+                    ChangeURI(node.Header);
                 }
-                count++;
+                else
+                {
+                    nodes.Add(node);
+                    count++;
+                }
             }
-            DebugPage.AppendLine("UpdatePage.ExtractNodes numberNodes: " + (count - 1));
+            DebugPage.AppendLine("UpdatePage.ExtractNodes numberNodes: " + count);
 
             // Save nodes to DB
-            await NodeDatabase.DBnodes.SaveNodeSAsync(nodes);
+            if (count > 0)
+            {
+                await NodeDatabase.DBnodes.SaveNodeSAsync(nodes);
+            }
 
-            // Reduce the count to account the Ackowledgement
-            return --count;
+            return count;
+        }
+        public static void ChangeURI(string URInew)
+        {
+            DebugPage.AppendLine("UpdatePage.ChangeURI URInew: " + URInew);
+            URI = URInew;
         }
         public static string DateTimeToStringOneBased(DateTime dateTime)
         {
@@ -134,22 +187,6 @@ namespace PGK.Views
             string[] times = elements[1].Split(':');
 
             return new DateTime(Int32.Parse(days[0]), Int32.Parse(days[1]), Int32.Parse(days[2]), Int32.Parse(times[0]), Int32.Parse(times[1]), Int32.Parse(times[2]));
-        }
-        public static DateTime FileStringToDateTime(string dateTime)
-        {
-            //DebugPage.AppendLine("UpdatePage.StringToDateTime: " + dateTime);
-            string[] elements = dateTime.Split(' ');
-            string[] days = elements[0].Split('/');
-            string[] times = elements[1].Split(':');
-
-            return new DateTime(Int32.Parse(days[0]), Int32.Parse(days[1]), Int32.Parse(days[2]), Int32.Parse(times[0]), Int32.Parse(times[1]), Int32.Parse(times[2]));
-        }
-        public static string[] ExtractHeader(string serverMsg)
-        {
-            //DebugPage.AppendLine("ExtractHeader");
-
-            string[] result = serverMsg.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-            return result[0].Split('$');
         }
         public static string CreateRandomAppID()
         {

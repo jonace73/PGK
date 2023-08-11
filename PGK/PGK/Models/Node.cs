@@ -63,7 +63,7 @@ namespace PGK.Models
             }
             else
             {
-                keywordSpan = new Span { Text = Keyword, TextColor = Color.LightYellow, FontAttributes = FontAttributes.Bold };
+                keywordSpan = new Span { Text = Keyword + MarkerCodes.keyDelimiter, TextColor = Color.LightYellow, FontAttributes = FontAttributes.Bold };
             }
             return CreateAllTypeNodeFrame(keywordSpan);
         }
@@ -76,7 +76,7 @@ namespace PGK.Models
             // AND for QUICK sorting nodes to display
             Label keywordLabel = new Label
             {
-                Text = Keyword,
+                Text = Keyword + MarkerCodes.keyDelimiter,
                 IsVisible = false
             };
 
@@ -238,46 +238,23 @@ namespace PGK.Models
 
             return answer;
         }
-        private string removeHeaderVerse()
+        public static Node CreateRetransmitNode()
         {
-            int indexBeginSearch = 0;
-            string header = string.Empty;
-            while (indexBeginSearch < Header.Length)
-            {
-                // Find starting indes
-                int indexStart = Header.IndexOf(SpanCodeConverter.startingDelimiters[0], indexBeginSearch);
-                //DebugPage.AppendLine("Node.removeHeaderVerse indexStart: "+ indexStart);
+            Node node = new Node();
+            node.Keyword = UpdatePage.retransmitKeyword;
+            node.Header = "Please click this node to download information cut due to connection error.";
+            node.nodeType = NodeType.Answer;
 
-                // No verse found
-                if (indexStart < 0)
-                {
-                    //DebugPage.AppendLine("Node.removeHeaderVerse indexStart: " + indexBeginSearch);
-                    // Copy heading text
-                    header += Header.Substring(indexBeginSearch);
-                    return header;
-                }
+            return node;
+        }
+        public static Node CreateSearchBarNode()
+        {
+            Node node = new Node();
+            node.Keyword = "Search";
+            node.Header = "Please click this node to search your desired keyword.";
+            node.nodeType = NodeType.SearchBar;
 
-                // Copy trailing text
-                if (indexStart > indexBeginSearch)
-                {
-                    header += Header.Substring(indexBeginSearch, indexStart - indexBeginSearch);
-                }
-
-                // Mid index
-                int indexStartVerse = indexStart + SpanCodeConverter.startingDelimiters[0].Length;
-                int indexMid = Header.IndexOf(SpanCodeConverter.midDelimiters[0], indexStartVerse);
-
-                // Copy mid text
-                header += Header.Substring(indexStartVerse, indexMid - indexStartVerse);
-                //DebugPage.AppendLine("Node.removeHeaderVerse indexMid: " + indexMid +" Verse: " + Header.Substring(indexStartVerse, indexMid - indexStartVerse));
-
-                // End index
-                int indexEnd = Header.IndexOf(SpanCodeConverter.endingDelimiters[0], indexMid + SpanCodeConverter.midDelimiters[0].Length);
-                indexBeginSearch = indexEnd + SpanCodeConverter.endingDelimiters[0].Length;
-                //DebugPage.AppendLine("Node.removeHeaderVerse NEW indexBeginSearch: " + indexBeginSearch);
-            }
-
-            return header;
+            return node;
         }
 
         //============================= MISC =========================================
@@ -341,12 +318,14 @@ namespace PGK.Models
         //============================= RESPONSES =========================================
         public void TapResponseRetransmit()
         {
+            DebugPage.AppendLine("Node.TapResponseRetransmit");
+
             var AppShellInstance = Xamarin.Forms.Shell.Current as AppShell;
             UpdatePage.appLastCheckTime = DateTime.UtcNow;
             UpdatePage.isUpdateOnGoing = true;
 
             // Used by UpdatePage.RotateImage() to continue rotating until UpdatePage.isUpdateOnGoing becomes false
-            UpdatePage.transmissionError = false;
+            UpdatePage.isTransmissionInError = false;
             UpdatePage.isDownloadFromServer = true;
             AppShellInstance.ShowUpdatePage();
         }
@@ -489,7 +468,7 @@ namespace PGK.Models
                 node.IsAnswerShown = false;//
                 node.nodeType = node.nodeType | NodeType.SearchResult; // Label as search result
                 node.LargeFramePadding = node.IsAnswerShown ? 5 : 0;
-                Span keywordSpan = new Span { Text = node.Keyword, TextColor = Color.LightYellow, FontAttributes = FontAttributes.Bold };
+                Span keywordSpan = new Span { Text = node.Keyword +MarkerCodes.keyDelimiter +" ", TextColor = Color.LightYellow, FontAttributes = FontAttributes.Bold };
                 Frame frame = node.CreateAllTypeNodeFrame(keywordSpan);
                 HomePage.scratchNodeFrameDB.Add(frame);
             }

@@ -10,7 +10,7 @@ namespace PGK.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class DebugPage : ContentPage
     {
-        public static bool isInDebug = false;//true
+        public static bool isInDebug = true;//true false
         static int nthDebugLine=0;
         static string debugText;
         public static string DebugText

@@ -97,15 +97,15 @@ namespace PGK.Views
 
             // If network error: add retransmit node on top.
             // If not in error: retransmit node will not be added and hence no need to remove
-            DebugPage.AppendLine(rootName + ".OnAppearing transmissionError: " + UpdatePage.transmissionError);
-            if (UpdatePage.transmissionError)
+            DebugPage.AppendLine(rootName + ".OnAppearing transmissionError: " + UpdatePage.isTransmissionInError);
+            if (UpdatePage.isTransmissionInError)
             {
-                allNodes.Add(ViewProcessor.CreateRetransmitNode());
+                //allNodes.Add(Node.CreateRetransmitNode());
             }
             // COPY TO OTHER PAGES LATER
 
             // Create search node
-            allNodes.Add(ViewProcessor.CreateSearchBarNode());
+            allNodes.Add(Node.CreateSearchBarNode());
         }
         public void DisplayPage()
         {

@@ -36,7 +36,7 @@ namespace PGKUITest
             string keyword = "father";
             app.EnterText((x => x.Marked(searchBar)), keyword);
             Task.Delay(3000);
-            app.Screenshot("Search result for: " + keyword); 
+            app.Screenshot("Search result for: " + keyword);
         }
     }
 }

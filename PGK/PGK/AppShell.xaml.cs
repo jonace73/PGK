@@ -40,7 +40,7 @@ namespace PGK
             OnAppearing();
 
         }
-        public void LeaveUpdate()
+        public void LeaveUpdatePage()
         {
             UpdateShell.IsVisible = false;
             HomeShell.IsVisible = true;

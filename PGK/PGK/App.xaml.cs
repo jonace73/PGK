@@ -1,14 +1,17 @@
 ﻿
 using Xamarin.Forms;
 using PGK.Services;
+using PGK.Views;
 
 namespace PGK
 {
     public partial class App : Application
     {
-        public static bool extractFromAsset = true;
-        static string sGlobalPath; // DON'T DELETE
+        // These two MUST be in App and NOT in MainActivity
+        public static bool isFirstCreation = true;
+        public static bool isFirstResume = true;
 
+        static string sGlobalPath; // DON'T DELETE
         public static string globalPath
         {
             // This is used for OnRestore from OnSleep

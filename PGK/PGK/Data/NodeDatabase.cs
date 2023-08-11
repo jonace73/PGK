@@ -13,6 +13,7 @@ namespace PGK.Data
     public class NodeDatabase
     {
         static NodeDatabase dbNodes;
+        static string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Nodes.db3");
         public static NodeDatabase DBnodes
         {
             get
@@ -21,10 +22,9 @@ namespace PGK.Data
                 {
                     try
                     {
-                        dbNodes = new
-                        NodeDatabase(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                        "Nodes.db3"));
-
+                        DebugPage.AppendLine("NodeDatabase.DBnodes");
+                        if (File.Exists(dbPath)) File.Delete(dbPath);
+                        dbNodes = new NodeDatabase(dbPath);
                     }
                     catch (Exception ex)
                     {
@@ -34,15 +34,15 @@ namespace PGK.Data
                 return dbNodes;
             }
         }
-        
+
         readonly SQLiteAsyncConnection NodeConn;
         public NodeDatabase(string dbPath)
         {
             try
             {
+                DebugPage.AppendLine("NodeDatabase()");
                 NodeConn = new SQLiteAsyncConnection(dbPath);
                 NodeConn.CreateTableAsync<Node>().Wait();
-
             }
             catch (Exception ex)
             {
@@ -64,7 +64,7 @@ namespace PGK.Data
         }
         public Task<List<Node>> SearchKeywordAsync(string keyword)
         {
-            Task < List < Node >> nodes = null;
+            Task<List<Node>> nodes = null;
             try
             {
                 nodes = NodeConn.QueryAsync<Node>("SELECT * FROM [Node] WHERE LeafTag LIKE ? OR Header LIKE ?", "%" + MarkerCodes.leafSeparator + keyword + "%", "%" + keyword + "%");
@@ -80,7 +80,8 @@ namespace PGK.Data
             try
             {
                 return NodeConn.Table<Node>().Where(i => i.LeafTag == LeafTag).FirstOrDefaultAsync();
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 DebugPage.AppendLine("NodeDatabase.GetChildAsync Error: " + ex.Message);
                 return null;
@@ -103,7 +104,7 @@ namespace PGK.Data
         }
         public async Task<int> InsertNodeAsync(Node node)
         {
-            int numberInserted;
+            int numberInserted; 
             try
             {
                 numberInserted = await NodeConn.InsertAsync(node);
@@ -176,7 +177,7 @@ namespace PGK.Data
             catch (Exception ex)
             {
                 DebugPage.AppendLine("NodeDatabase.SaveNodeAsync Error: " + ex.Message);
-                 return -1;
+                return -1;
             }
 
             // Return the number of added or updated Nodes
