@@ -22,6 +22,18 @@ namespace PGK.iOS
             LoadApplication(new App());
 
             return base.FinishedLaunching(app, options);
+        }        
+        public override async void OnActivated(UIApplication uiApplication)
+        {
+            // Called when the application is launched and every time the app returns to the foreground. 
+            base.OnActivated(uiApplication);
+            
+            // Call OnCreate common to Android and iOS
+            // The next line will just be entered then exited right away after the first creation.
+            await App.CommonOnCreate();
+
+            // The next line will not be executed at the first creation, but after.
+            App.CommonOnResume();
         }
-    }
+    } // END CLASS
 }

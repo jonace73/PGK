@@ -35,6 +35,12 @@
 %\fi=#xi#
 \newcommand{\fI}{\begin{switch}{\value{intentioncounter}}\case{1}{fi}\case{2}{fi}\case{3}{\#xi\#}\end{switch}}
 
+%\singleQuote=\SQ
+\newcommand{\SQ}{\begin{switch}{\value{intentioncounter}}\case{1}{'}\case{2}{'}\case{3}{\#SQ}\end{switch}}
+
+%\doubleQuote=#DQ
+\newcommand{\DQ}{\begin{switch}{\value{intentioncounter}}\case{1}{"}\case{2}{"}\case{3}{\#DQ}\end{switch}}
+
 %========== Two or Three markers ==========
 %\linkOutMarker=#NK,L#K,KN#
 %\linkMarker=#LK,M#L,KL#
@@ -48,6 +54,12 @@
 
 %\verseMarker=#VR,RV#
 \newcommand{\Verse}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{[#1]}\case{2}{[\textcolor{red}{#1}]}\case{3}{\#VR\ #1\ RV\#}\end{switch}}
+
+%\Pro=#CT,TC#
+\newcommand{\Pro}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{\textcolor{teal}{#1}}\case{2}{\textcolor{teal}{#1}}\case{3}{\#CT#1TC\#}\end{switch}}
+
+%\Con=#PT,TP#
+\newcommand{\Con}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{\textcolor{brown}{#1}}\case{2}{\textcolor{brown}{#1}}\case{3}{\#PT#1TP\#}\end{switch}}
 
 %========== Header Answer ==========
 %\headerMarker=#HD,M#H,DH#

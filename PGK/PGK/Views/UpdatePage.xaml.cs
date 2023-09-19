@@ -92,7 +92,7 @@ namespace PGK.Views
 
             return 0;
         }
-        public async Task<int> DownloadFromServer()
+        public static async Task<int> DownloadFromServer()
         {
             // Send message
             DebugPage.AppendLine("UpdatePage.DownloadFromServer appLastUpdateTime: " + DateTimeToStringOneBased(appLastUpdateTime));
@@ -110,8 +110,7 @@ namespace PGK.Views
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 //  send a POST request
-                var uri = URI;
-                var result = await client.PostAsync(uri, content);
+                var result = await client.PostAsync(URI, content);
 
                 // on error throw a exception  
                 result.EnsureSuccessStatusCode();
@@ -126,7 +125,18 @@ namespace PGK.Views
 
             return 0;
         }
-        private async Task<bool> ProcessReceivedPost(Post post)
+        public static void UpdateFromServer()
+        {
+            DebugPage.AppendLine("UpdatePage.UpdateFromServer");
+
+            appLastCheckTime = DateTime.UtcNow;
+            isUpdateOnGoing = true;
+            isTransmissionInError = false;
+            isDownloadFromServer = true;
+            var AppShellInstance = Xamarin.Forms.Shell.Current as AppShell;
+            AppShellInstance.ShowUpdatePage();
+        }
+        private static async Task<bool> ProcessReceivedPost(Post post)
         {
             DebugPage.AppendLine("UpdatePage.ProcessReceivedPost numberNodes: " + post.numberNodes);
             if (post.numberNodes == 0) return true;
@@ -148,9 +158,9 @@ namespace PGK.Views
             foreach (string str in result)
             {
                 Node node = ViewProcessor.LineFromServerToNode(str);
-                if (node.Keyword.Equals("URIchange"))
+                if (ViewProcessor.ExtractPathRoot(node.LeafTag).Equals("Parameters"))
                 {
-                    ChangeURI(node.Header);
+                    ProcessParameters(node);
                 }
                 else
                 {
@@ -168,10 +178,25 @@ namespace PGK.Views
 
             return count;
         }
-        public static void ChangeURI(string URInew)
+        public static void ProcessParameters(Node node)
         {
-            DebugPage.AppendLine("UpdatePage.ChangeURI URInew: " + URInew);
-            URI = URInew;
+            DebugPage.AppendLine("UpdatePage.ProcessParameters");
+            switch (node.Keyword)
+            {
+                case "URIchange": ChangeURI(node.Header); break;
+                case "Testing": Test(node); break;
+            }
+            
+        }
+        static void Test(Node node)
+        {
+            DebugPage.AppendLine("UpdatePage.Test");
+            // LATER
+        }
+        static void ChangeURI(string novoURI)
+        {
+            DebugPage.AppendLine("UpdatePage.ChangeURI URInew: " + novoURI);
+            URI = novoURI;
         }
         public static string DateTimeToStringOneBased(DateTime dateTime)
         {

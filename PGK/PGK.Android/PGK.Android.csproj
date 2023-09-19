@@ -82,7 +82,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidAsset Include="Assets\Commands.tex" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
@@ -141,8 +140,6 @@
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\BackArrow.png" />
   </ItemGroup>
-  <ItemGroup>
-    <AndroidAsset Include="Assets\NodesDB.txt" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>

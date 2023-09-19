@@ -12,16 +12,19 @@ namespace PGK.Services
 {
     public class SpanCodeConverter : IValueConverter
     {
+        //=============== ADD new action/command name HERE
         public enum Action
         {
-            Prompt, Weblink, NodeLink, Text // Text MUST be last
+            Prompt, Weblink, NodeLink, Pro, Con, Text // Text MUST be last
         }
 
-        public static string[] startingDelimiters = { MarkerCodes.promptMarker[0], MarkerCodes.weblink[0], MarkerCodes.linkOutMarker[0] };
-        public static string[] midDelimiters = { MarkerCodes.promptMarker[1], MarkerCodes.weblink[1], MarkerCodes.linkOutMarker[1] };
-        public static string[] endingDelimiters = { MarkerCodes.promptMarker[2], MarkerCodes.weblink[2], MarkerCodes.linkOutMarker[2] };
+        //=============== ADD new markers HERE
+        public static string[] startingDelimiters = { MarkerCodes.promptMarker[0], MarkerCodes.weblink[0], MarkerCodes.linkOutMarker[0], MarkerCodes.proMarker[0], MarkerCodes.conMarker[0] };
+        public static string[] midDelimiters = { MarkerCodes.promptMarker[1], MarkerCodes.weblink[1], MarkerCodes.linkOutMarker[1], "", "" };
+        public static string[] endingDelimiters = { MarkerCodes.promptMarker[2], MarkerCodes.weblink[2], MarkerCodes.linkOutMarker[2], MarkerCodes.proMarker[1], MarkerCodes.conMarker[1] };
 
-        public static Action[] actionTypes = { Action.Prompt, Action.Weblink, Action.NodeLink };
+        //=============== ADD new action/command name HERE
+        public static Action[] actionTypes = { Action.Prompt, Action.Weblink, Action.NodeLink, Action.Pro, Action.Con };
         //              actionTypes MUST exactly correspond to the delimiters
         public SpanCodeConverter() { }
 
@@ -50,6 +53,24 @@ namespace PGK.Services
         private Span CreateSpan(StringSection section)
         {
             var span = new Span();
+
+            // If PRO
+            if (section.action == Action.Pro)
+            {
+                //DebugPage.AppendLine("SpanCodeConverter.CreateSpan Pro: " + section.Text);
+                span.Text = section.Text;
+                span.TextColor = Color.Teal;
+                return span;
+            }
+
+            // If CON
+            if (section.action == Action.Con)
+            {
+                //DebugPage.AppendLine("SpanCodeConverter.CreateSpan Con: " + section.Text);
+                span.Text = section.Text;
+                span.TextColor = Color.Brown;
+                return span;
+            }
 
             // If PROMPT
             if (section.action == Action.Prompt)
@@ -109,7 +130,8 @@ namespace PGK.Services
             // Starting point to search for the delimiters
             int searchBeginingIndex = 0;
 
-            //DebugPage.AppendLine("Node.CreateSpan startingTextIndex: "+ startingTextIndex + " numberDelimeters: " + numberDelimeters + " rawText: " + rawText);
+            //bool isQuickTip = sourceNode.IndexOf("Quick tip") > -1;
+            //if (isQuickTip) DebugPage.AppendLine("SpanCodeConverter.ProcessString numberDelimeters: " + numberDelimeters +" Start: "+ startingDelimiters[3] + " End: " + endingDelimiters[3]);
 
             while (true)
             {
@@ -126,6 +148,8 @@ namespace PGK.Services
                         ithDelimiter = ii;
                     }
                 }
+
+                //if (isQuickTip) DebugPage.AppendLine("SpanCodeConverter.ProcessString ithDelimiter: " + ithDelimiter);
 
                 // IF all text, i.e., no delimiter
                 if (ithDelimiter < 0)
@@ -171,8 +195,6 @@ namespace PGK.Services
             public Action action { get; set; }
             public StringSection(string itemValue, int indexAction, string sourceNode)
             {
-                //DebugPage.AppendLine("SpanCodeConverter.StringSection indexAction: " + indexAction);
-
                 // Text action
                 if (indexAction >= actionTypes.Length)
                 {
@@ -183,6 +205,16 @@ namespace PGK.Services
 
                 // Input the action
                 this.action = actionTypes[indexAction];
+
+                // Switch case
+                if (action == Action.Pro || action == Action.Con)
+                {
+                    //bool isQuickTip = sourceNode.IndexOf("Quick tip") > -1;
+                    //if (isQuickTip) DebugPage.AppendLine("SpanCodeConverter.StringSection itemValue: " + itemValue + " indexAction: " + indexAction);
+                    
+                    Text = itemValue;
+                    return;
+                }
                 if (action == Action.Prompt)
                 {
                     Text = itemValue.Substring(0, itemValue.IndexOf(midDelimiters[0]));// verse number only
@@ -264,7 +296,7 @@ namespace PGK.Services
                 AppShellInstance.DisplayPage(rootPath);//*/
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 DebugPage.AppendLine("SpanCodeConverter.nodelinkCommand ERROR: " + ex.Message);
             }

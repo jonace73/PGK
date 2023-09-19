@@ -6,6 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\Commands.tex" />
+    <None Remove="Assets\NodesDB.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\Commands.tex" />
+    <EmbeddedResource Include="Assets\NodesDB.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />

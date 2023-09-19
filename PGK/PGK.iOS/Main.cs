@@ -1,4 +1,10 @@
-﻿using UIKit;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Xml;
+using System;
+using UIKit;
+using System.Reflection;
 
 namespace PGK.iOS
 {
@@ -11,5 +17,6 @@ namespace PGK.iOS
             // you can specify it here.
             UIApplication.Main(args, null, typeof(AppDelegate));
         }
-    }
+
+    } // END CLASS
 }

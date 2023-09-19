@@ -12,6 +12,7 @@ namespace PGK.Data
     [Table("Nodes")]
     public class NodeDatabase
     {
+        public static bool isFromCrash = false;
         static NodeDatabase dbNodes;
         static string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Nodes.db3");
         public static NodeDatabase DBnodes
@@ -22,8 +23,14 @@ namespace PGK.Data
                 {
                     try
                     {
+                        // Signal app being from crash state
                         DebugPage.AppendLine("NodeDatabase.DBnodes");
-                        if (File.Exists(dbPath)) File.Delete(dbPath);
+                        if (File.Exists(dbPath))
+                        {
+                            DebugPage.AppendLine("NodeDatabase.DBnodes app from CRASH.");
+                            isFromCrash = true;
+                            File.Delete(dbPath);
+                        }
                         dbNodes = new NodeDatabase(dbPath);
                     }
                     catch (Exception ex)
@@ -97,14 +104,14 @@ namespace PGK.Data
             catch (Exception ex)
             {
                 DebugPage.AppendLine("NodeDatabase.UpdateNodeAsync Error: " + ex.Message);
-                return -1;
+                return 0;
             }
 
             return numberUpdated;
         }
         public async Task<int> InsertNodeAsync(Node node)
         {
-            int numberInserted; 
+            int numberInserted;
             try
             {
                 numberInserted = await NodeConn.InsertAsync(node);
@@ -112,7 +119,7 @@ namespace PGK.Data
             catch (Exception ex)
             {
                 DebugPage.AppendLine("NodeDatabase.InsertNodeAsync Error: " + ex.Message);
-                return -1;
+                return 0;
             }
 
             return numberInserted;
@@ -143,32 +150,24 @@ namespace PGK.Data
         }
         public async Task<int> SaveNodeAsync(Node node)
         {
-
             // Save nodes.
-            int numberProessedNodes = 0;
-            int number;
+            int numberProessedNodes;
             try
             {
                 Node twin = await GetChildAsync(node.LeafTag);
                 if (twin == null)
                 {
-                    number = await InsertNodeAsync(node);
-                    if (number < 0) return -1;
-                    numberProessedNodes += number;
+                    numberProessedNodes = await InsertNodeAsync(node);
                 }
                 else
                 {
                     if (node.IsDeleted)
                     {
-                        number = await DeleteNodeAsync(node);
-                        if (number < 0) return -1;
-                        numberProessedNodes += number;
+                        numberProessedNodes = await DeleteNodeAsync(node);
                     }
                     else
                     {
-                        number = await UpdateNodeAsync(node);
-                        if (number < 0) return -1;
-                        numberProessedNodes += number;
+                        numberProessedNodes = await UpdateNodeAsync(node);
                     }
 
                 }
@@ -177,7 +176,7 @@ namespace PGK.Data
             catch (Exception ex)
             {
                 DebugPage.AppendLine("NodeDatabase.SaveNodeAsync Error: " + ex.Message);
-                return -1;
+                return 0;
             }
 
             // Return the number of added or updated Nodes
@@ -193,7 +192,7 @@ namespace PGK.Data
             catch (Exception err)
             {
                 DebugPage.AppendLine("SaveNodeAsync: " + err.Message);
-                numberProessedNodes = -1;
+                numberProessedNodes = 0;
             }
 
             return numberProessedNodes;

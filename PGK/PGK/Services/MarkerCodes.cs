@@ -10,6 +10,7 @@ namespace PGK.Services
 
         public static string[] verseMarker, headerMarker, answerMarker, targetMarker, chapterMarker, sectionMarker, subSectionMarker;
         public static string[] biblioMarker, promptMarker, weblink, apostrophe;
+        public static string[] proMarker, conMarker;
 
         // NOTE: linkMarker marks \LinkTo. However, after disassembling the link the output MUST be delimited by linkOutMarker
         public static string[] linkMarker, linkOutMarker; 
@@ -47,7 +48,9 @@ namespace PGK.Services
                 case "subSectionMarker": subSectionMarker = translateAcode(codePair[1]); break;
                 case "biblioMarker": biblioMarker = translateAcode(codePair[1]); break;
                 case "promptMarker": promptMarker = translateAcode(codePair[1]); break;
-                case "weblink": weblink = translateAcode(codePair[1]); break;                    
+                case "weblink": weblink = translateAcode(codePair[1]); break;
+                case "Con": conMarker = translateAcode(codePair[1]); break;
+                case "Pro": proMarker = translateAcode(codePair[1]); break;
                 case "ff": ff = new string[]{codePair[1], "ff"}; break;
                 case "fl": fl = new string[] { codePair[1], "fl" }; break;
                 case "fi": fi = new string[] { codePair[1], "fi" }; break;
