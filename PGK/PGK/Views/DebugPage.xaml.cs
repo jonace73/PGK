@@ -94,20 +94,22 @@ namespace PGK.Views
             DebugPage.AppendLine("OnDeliberateCrash crash analytics isEnabled: " + isEnabled);
             if (isEnabled)
             {
-                Crashes.GenerateTestCrash();
+                DebugPage.AppendLine("DebugPage.OnDeliberateCrash");
+                DependencyService.Get<ICrash>().MakeToast("Called from OnDeliberateCrash");
+                //Crashes.GenerateTestCrash();
             }
         }
         async void OnReportPreviousCrash(object sender, EventArgs e)
         {
             bool isEnabled = await Analytics.IsEnabledAsync();
-            DebugPage.AppendLine("OnReportPreviousCrash crash analytics isEnabled: " + isEnabled);// Analytics.TrackEvent("OnAlarmsToServer clicked");
+            DebugPage.AppendLine("DebugPage.OnReportPreviousCrash crash analytics isEnabled: " + isEnabled);// Analytics.TrackEvent("OnAlarmsToServer clicked");
             if (!isEnabled) return;
 
-            bool didAppCrash = await Crashes.HasCrashedInLastSessionAsync();
+            bool didAppCrash = await Crashes.HasCrashedInLastSessionAsync();// This works
             if (didAppCrash)
             {
-                ErrorReport crashReport = await Crashes.GetLastSessionCrashReportAsync();
-                DebugPage.AppendLine("Last CrashReport: " + crashReport.StackTrace);
+                ErrorReport crashReport = await Crashes.GetLastSessionCrashReportAsync();// This DOESN'T work
+                DebugPage.AppendLine("DebugPage.Last CrashReport: " + crashReport.StackTrace);
                 // Send this same report to WhizKod server
             }
         }
