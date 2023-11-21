@@ -12,12 +12,12 @@ namespace PGK.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class HomePage : ContentPage
     {
-        static string rootName = "Home";
+        public static string rootName = "Home";
         public static bool useScratchDB = false;
         public static List<Frame> scratchNodeFrameDB = new List<Frame>();
         public static bool showBackArrow = false;
         static string sPathSeed;
-        public static string placeholder = "Type keyword to search here.";
+        public static string placeholder = "Tap \"Guide\" word below.";
         public static bool isDisplayingSearchResults = false;
         public static string pathSeed
         {// Has a sample form A>B>C->
@@ -72,7 +72,7 @@ namespace PGK.Views
             // Save pathSeed to globalPath
             App.globalPath = pathSeed;
 
-            // Retrieve then display DB nodes. The next line might be called before the creation of the DB and will then cause an error.
+            // Retrieve then display DB nodes.
             List<Node> DBnodes = await NodeDatabase.DBnodes.GetBranchesAsync(pathSeed);
             if (DBnodes == null) return;
             Node.SortNodes(ref DBnodes);

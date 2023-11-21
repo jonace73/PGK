@@ -13,8 +13,13 @@ namespace PGK
             InitializeComponent();
             // Use the keys as the ROOT of paths
             rootPathToShellDictionary = new Dictionary<string, ShellContent>(){
-    {"Home", HomeShell}, {"Beliefs", BeliefsShell}, {"Divine", DivineShell}, {"Social", SocialIssuesShell}, {"Authority", StructureShell}, {"Update", UpdateShell } };//*/
-            
+                {HomePage.rootName, HomeShell},
+                {BeliefsPage.rootName, BeliefsShell},
+                {DivinePage.rootName, DivineShell},
+                {SocialIssuesPage.rootName, SocialIssuesShell},
+                {StructurePage.rootName, StructureShell},
+                {UpdatePage.rootName, UpdateShell } 
+            };
         }
         protected override void OnAppearing()
         {
@@ -55,7 +60,7 @@ namespace PGK
             // Set the ShellContent to be displayed first 
             DebugPage.AppendLine("AppShell.LeaveUpdate pathRoot: " + ViewProcessor.ExtractPathRoot(App.globalPath));
             Current.CurrentItem = rootPathToShellDictionary[ViewProcessor.ExtractPathRoot(App.globalPath)];
-            
+
             OnAppearing();//*/
         }
         public void DisplayPage(string rootPath)

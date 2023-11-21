@@ -9,7 +9,7 @@ namespace PGK.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class DivinePage : ContentPage
     {
-        static string rootName = "Divine";
+        public static string rootName = "Divine";
         public static bool useScratchDB = false;
         public static List<Frame> scratchNodeFrameDB = new List<Frame>();
         public static bool showBackArrow = false;

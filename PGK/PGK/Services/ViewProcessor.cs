@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Xamarin.Essentials;
 using Xamarin.Forms;
 using static PGK.Models.Node;
 
@@ -31,7 +31,7 @@ namespace PGK.Services
             node.Keyword = DecodeQuotes(ExtractKeyword(node.LeafTag));
             node.Header = DecodeQuotes(fields.ElementAt(1));
             node.Answer = DecodeQuotes(fields.ElementAt(2));
-            node.nodeType = fields.ElementAt(3).Trim().Equals("1") ? NodeType.Answer : NodeType.Branch;
+            node.nodeType = ExtractNodeType(fields.ElementAt(3).Trim());
             node.IsDeleted = fields.ElementAt(4).Trim().Equals("1");
 
             // The date in NodesDB.txt has the format dd/month/year hour:minutes.
@@ -63,7 +63,7 @@ namespace PGK.Services
             node.Keyword = DecodeQuotes(ExtractKeyword(node.LeafTag));
             node.Header = DecodeQuotes(fields.ElementAt(1));
             node.Answer = DecodeQuotes(fields.ElementAt(2));
-            node.nodeType = fields.ElementAt(3).Trim().Equals("1") ? NodeType.Answer : NodeType.Branch;
+            node.nodeType = ExtractNodeType(fields.ElementAt(3).Trim());
             node.IsDeleted = fields.ElementAt(4).Trim().Equals("1");
             node.DateUpdated = fields.ElementAt(5);
 
@@ -96,7 +96,7 @@ namespace PGK.Services
             string[] excludedArticles = { "a", "an", "the", "is", "was", "are", "were", "has", "had", "been", "have", "some", "all", "that", "did", "do", "does" };
             string[] excludedPronouns = { "he", "she", "it", "they", "i", "we", "you", "me", "us", "her", "him", "them", "hers", "his", "theirs", "my", "our", "your", "their" };
             string[] excludedMorePronouns = { "there", "not", "should", "must", "any", "both", "each", "either", "such", "these", "this", "those", "what", "which", "who", "whom", "whose" };
-            
+
             if (IsExcludedFrom(excludedPrepositions, text)) return true;
             if (IsExcludedFrom(excludedArticles, text)) return true;
             if (IsExcludedFrom(excludedPronouns, text)) return true;
@@ -124,13 +124,13 @@ namespace PGK.Services
         }
         public static string StripWord(string word)
         {
-            string retWord = word.Replace("?","");
+            string retWord = word.Replace("?", "");
             retWord = retWord.Replace(".", "");
             retWord = retWord.Replace("'", "");
             retWord = retWord.Replace("!", "");
             retWord = retWord.Replace(",", "");
             retWord = retWord.ToLower();
-            DebugPage.AppendLine("StripWord: "+retWord);
+            DebugPage.AppendLine("StripWord: " + retWord);
             return retWord;
         }
 
@@ -201,18 +201,26 @@ namespace PGK.Services
             App.globalPath = pathSeed;
 
             string rootPath = ExtractPathRoot(pathSeed);
-
-            // Save path to pathSeed
-            switch (rootPath)
+            if (rootPath.Equals(HomePage.rootName))
             {
-                case "Home": HomePage.pathSeed = pathSeed; break;
-                case "Beliefs": BeliefsPage.pathSeed = pathSeed; break;
-                case "Divine": DivinePage.pathSeed = pathSeed; break;
-                case "Social": SocialIssuesPage.pathSeed = pathSeed; break;
-                case "Authority": StructurePage.pathSeed = pathSeed; break;
-                default: break;
+                HomePage.pathSeed = pathSeed; return;
             }
-
+            if (rootPath.Equals(BeliefsPage.rootName))
+            {
+                BeliefsPage.pathSeed = pathSeed; return;
+            }
+            if (rootPath.Equals(DivinePage.rootName))
+            {
+                DivinePage.pathSeed = pathSeed; return;
+            }
+            if (rootPath.Equals(SocialIssuesPage.rootName))
+            {
+                SocialIssuesPage.pathSeed = pathSeed; return;
+            }
+            if (rootPath.Equals(StructurePage.rootName))
+            {
+                StructurePage.pathSeed = pathSeed; return;
+            }
         }
 
         //============================= SCRATCH PROCESSING =========================================
@@ -228,43 +236,72 @@ namespace PGK.Services
         }
         public static void SetUseScratchDB(string rootPath, bool setOrNot)
         {
-            // Find the page that contains pageLayout and call its OnAppearing through  DisplayPage()
-            switch (rootPath)
+            if (rootPath.Equals(HomePage.rootName))
             {
-                case "Home": HomePage.useScratchDB = setOrNot; break;
-                case "Divine": DivinePage.useScratchDB = setOrNot; break;
-                case "Authority": StructurePage.useScratchDB = setOrNot; break;
-                case "Beliefs": BeliefsPage.useScratchDB = setOrNot; break;
-                case "Social": SocialIssuesPage.useScratchDB = setOrNot; break;
-                default: break;
+                HomePage.useScratchDB = setOrNot; return;
             }
-
+            if (rootPath.Equals(BeliefsPage.rootName))
+            {
+                BeliefsPage.useScratchDB = setOrNot; return;
+            }
+            if (rootPath.Equals(DivinePage.rootName))
+            {
+                DivinePage.useScratchDB = setOrNot; return;
+            }
+            if (rootPath.Equals(SocialIssuesPage.rootName))
+            {
+                SocialIssuesPage.useScratchDB = setOrNot; return;
+            }
+            if (rootPath.Equals(StructurePage.rootName))
+            {
+                StructurePage.useScratchDB = setOrNot; return;
+            }
         }
         private static void ScratchAddFrame(Frame frame, string rootPath)
         {
-            switch (rootPath)
+            if (rootPath.Equals(HomePage.rootName))
             {
-                case "Home": HomePage.scratchNodeFrameDB.Add(frame); break;
-                case "Beliefs": BeliefsPage.scratchNodeFrameDB.Add(frame); break;
-                case "Divine": DivinePage.scratchNodeFrameDB.Add(frame); break;
-                case "Social": SocialIssuesPage.scratchNodeFrameDB.Add(frame); break;
-                case "Authority": StructurePage.scratchNodeFrameDB.Add(frame); break;
-                default: break;
+                HomePage.scratchNodeFrameDB.Add(frame); return;
             }
-
+            if (rootPath.Equals(BeliefsPage.rootName))
+            {
+                BeliefsPage.scratchNodeFrameDB.Add(frame); return;
+            }
+            if (rootPath.Equals(DivinePage.rootName))
+            {
+                DivinePage.scratchNodeFrameDB.Add(frame); return;
+            }
+            if (rootPath.Equals(SocialIssuesPage.rootName))
+            {
+                SocialIssuesPage.scratchNodeFrameDB.Add(frame); return;
+            }
+            if (rootPath.Equals(StructurePage.rootName))
+            {
+                StructurePage.scratchNodeFrameDB.Add(frame); return;
+            }
         }
         private static void ScratchNodeFramesReset(string rootPath)
         {
-            switch (rootPath)
+            if (rootPath.Equals(HomePage.rootName))
             {
-                case "Home": HomePage.scratchNodeFrameDB = new List<Frame>(); break;
-                case "Beliefs": BeliefsPage.scratchNodeFrameDB = new List<Frame>(); break;
-                case "Divine": DivinePage.scratchNodeFrameDB = new List<Frame>(); break;
-                case "Social": SocialIssuesPage.scratchNodeFrameDB = new List<Frame>(); break;
-                case "Authority": StructurePage.scratchNodeFrameDB = new List<Frame>(); break;
-                default: break;
+                HomePage.scratchNodeFrameDB = new List<Frame>(); return;
             }
-
+            if (rootPath.Equals(BeliefsPage.rootName))
+            {
+                BeliefsPage.scratchNodeFrameDB = new List<Frame>(); return;
+            }
+            if (rootPath.Equals(DivinePage.rootName))
+            {
+                DivinePage.scratchNodeFrameDB = new List<Frame>(); return;
+            }
+            if (rootPath.Equals(SocialIssuesPage.rootName))
+            {
+                SocialIssuesPage.scratchNodeFrameDB = new List<Frame>(); return;
+            }
+            if (rootPath.Equals(StructurePage.rootName))
+            {
+                StructurePage.scratchNodeFrameDB = new List<Frame>(); return;
+            }
         }
         public static ScrollView ScratchFramesToScrollView(List<Frame> scratchFrames)
         {
@@ -299,19 +336,19 @@ namespace PGK.Services
 
             return scrollView;
         }
-        private static double AddFrameHeight(Frame frame, ref bool willAddHeight)
+        private static double AddFrameHeight(Frame nodeFrame, ref bool willAddHeight)
         {
             // Consider DIFFERENT TYPES of frames inside a stackLayout
             // If the frame is a search bar
-            if (frame.Content is SearchBar)
+            if (nodeFrame.Content is SearchBar)
             {
                 DebugPage.AppendLine("ViewProcessor.AddFrameHeight is SearchBar");
-                return frame.Height;
+                return nodeFrame.Height;
             }
 
             // ELSE 
-            double heightToAdd = 0;
-            StackLayout innerLayout = frame.Content as StackLayout;
+            double heightToAdd;
+            StackLayout innerLayout = nodeFrame.Content as StackLayout;
             Frame tappedHeaderFrame = innerLayout.Children[0] as Frame;
             StackLayout headderLayout = tappedHeaderFrame.Content as StackLayout;
             Label invisibleLeafTagLabel = headderLayout.Children[2] as Label;
@@ -323,7 +360,7 @@ namespace PGK.Services
             }
             else
             {
-                heightToAdd = frame.Height + Node.topMargin;
+                heightToAdd = nodeFrame.Height + Node.topMargin;
             }
             return heightToAdd;
         }
@@ -360,22 +397,32 @@ namespace PGK.Services
         {
             foreach (Node node in nodes)
             {
-                node.nodeType = node.nodeType & Node.NodeType.Answer;
+                node.nodeType = node.nodeType & Node.NodeType.AnswerAsText;
             }
         }
         public static void SetBackArrow(string rootPath, bool showBackArrow)
         {
             DebugPage.AppendLine("Node.SetBackArrow rootPath: " + rootPath);
-            switch (rootPath)
+            if (rootPath.Equals(HomePage.rootName))
             {
-                case "Home": HomePage.showBackArrow = showBackArrow; break;
-                case "Beliefs": BeliefsPage.showBackArrow = showBackArrow; break;
-                case "Divine": DivinePage.showBackArrow = showBackArrow; break;
-                case "Social": SocialIssuesPage.showBackArrow = showBackArrow; break;
-                case "Authority": StructurePage.showBackArrow = showBackArrow; break;
-                default: break;
+                HomePage.showBackArrow = showBackArrow; return;
             }
-
+            if (rootPath.Equals(BeliefsPage.rootName))
+            {
+                BeliefsPage.showBackArrow = showBackArrow; return;
+            }
+            if (rootPath.Equals(DivinePage.rootName))
+            {
+                DivinePage.showBackArrow = showBackArrow; return;
+            }
+            if (rootPath.Equals(SocialIssuesPage.rootName))
+            {
+                SocialIssuesPage.showBackArrow = showBackArrow; return;
+            }
+            if (rootPath.Equals(StructurePage.rootName))
+            {
+                StructurePage.showBackArrow = showBackArrow; return;
+            }
         }
         public static ScrollView NodesToScrollView(string rootPath, List<Node> nodes)
         {
@@ -383,7 +430,7 @@ namespace PGK.Services
             // Create the page's stack layout. DON'T PUT start, center or end IN pageLayout SO AS NOT TO RESTRICT THE VIEW
             StackLayout pageLayout = new StackLayout();
 
-            // Reset ResetScratchNodeFrames
+            // Reset ResetScratchNodeFrames, i.e., make NEW list of frames
             ScratchNodeFramesReset(rootPath);
 
             // Add its children/nodes to pageLayout and SCRATCH
@@ -394,6 +441,17 @@ namespace PGK.Services
                 // Save Frames to SCRATCH list
                 Frame nodeFrame = node.CreateNodeFrame();
                 if (nodeFrame == null) break;
+
+                // If is an imageAnswer type node increase frame height by image height
+                if (node.nodeType == NodeType.AnswerAsImage)
+                {
+                    string[] imageAnswer = node.Answer.Split(new string[] { MarkerCodes.imageSeparator }, StringSplitOptions.None);
+
+                    StackLayout innerLayout = (StackLayout)nodeFrame.Children[0];
+                    // This will PREPARE the frame height is image (innerLayout.Children[1]) should be presented
+                    innerLayout.Children[1].HeightRequest = node.IsAnswerShown ? Int32.Parse(imageAnswer[0]) : 0;
+                }
+
                 if (pathToJump.Length > 0)
                 {
                     if (addHeight)
@@ -429,16 +487,26 @@ namespace PGK.Services
             ScrollView scrollView = pageLayout.Parent as ScrollView;
 
             // Find the page that contains pageLayout and call its OnAppearing through  DisplayPage()
-            switch (rootPath)
+            if (rootPath.Equals(HomePage.rootName))
             {
-                case "Home": (scrollView.Parent as HomePage).DisplayPage(); break;
-                case "Divine": (scrollView.Parent as DivinePage).DisplayPage(); break;
-                case "Authority": (scrollView.Parent as StructurePage).DisplayPage(); break;
-                case "Beliefs": (scrollView.Parent as BeliefsPage).DisplayPage(); break;
-                case "Social": (scrollView.Parent as SocialIssuesPage).DisplayPage(); break;
-                default: break;
+                (scrollView.Parent as HomePage).DisplayPage(); return;
             }
-
+            if (rootPath.Equals(BeliefsPage.rootName))
+            {
+                (scrollView.Parent as BeliefsPage).DisplayPage(); return;
+            }
+            if (rootPath.Equals(DivinePage.rootName))
+            {
+                (scrollView.Parent as DivinePage).DisplayPage(); return;
+            }
+            if (rootPath.Equals(SocialIssuesPage.rootName))
+            {
+                (scrollView.Parent as SocialIssuesPage).DisplayPage(); return;
+            }
+            if (rootPath.Equals(StructurePage.rootName))
+            {
+                (scrollView.Parent as StructurePage).DisplayPage(); return;
+            }
         }
         public static void RefreshContentPage(Frame tappedHeaderFrame, string rootPath)
         {
@@ -454,16 +522,26 @@ namespace PGK.Services
             NodeHeight(pageLayout);
 
             // Find the page that contains pageLayout and call its OnAppearing through  DisplayPage()
-            switch (rootPath)
+            if (rootPath.Equals(HomePage.rootName))
             {
-                case "Home": (scrollView.Parent as HomePage).SetContentPage(pageLayout); break;
-                case "Divine": (scrollView.Parent as DivinePage).SetContentPage(pageLayout); break;
-                case "Authority": (scrollView.Parent as StructurePage).SetContentPage(pageLayout); break;
-                case "Beliefs": (scrollView.Parent as BeliefsPage).SetContentPage(pageLayout); break;
-                case "Social": (scrollView.Parent as SocialIssuesPage).SetContentPage(pageLayout); break;
-                default: break;
+                (scrollView.Parent as HomePage).SetContentPage(pageLayout); return;
             }
-
+            if (rootPath.Equals(BeliefsPage.rootName))
+            {
+                (scrollView.Parent as BeliefsPage).SetContentPage(pageLayout); return;
+            }
+            if (rootPath.Equals(DivinePage.rootName))
+            {
+                (scrollView.Parent as DivinePage).SetContentPage(pageLayout); return;
+            }
+            if (rootPath.Equals(SocialIssuesPage.rootName))
+            {
+                (scrollView.Parent as SocialIssuesPage).SetContentPage(pageLayout); return;
+            }
+            if (rootPath.Equals(StructurePage.rootName))
+            {
+                (scrollView.Parent as StructurePage).SetContentPage(pageLayout); return;
+            }
         }
         public static bool ShowBranches(Frame tappedHeaderFrame, string LeafTag)
         {
@@ -521,11 +599,11 @@ namespace PGK.Services
 
             scrollHeight = 0;
             bool willAddHeight = true;
-            foreach (Frame frame in pageLayout.Children)
-            {                
+            foreach (Frame nodeFrame in pageLayout.Children)
+            {
                 if (!willAddHeight) continue;
 
-                scrollHeight += AddFrameHeight(frame, ref willAddHeight);
+                scrollHeight += AddFrameHeight(nodeFrame, ref willAddHeight);
             }
 
             // Scale scroll height

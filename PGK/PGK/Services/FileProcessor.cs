@@ -2,6 +2,7 @@
 using PGK.Models;
 using PGK.Views;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -24,7 +25,6 @@ namespace PGK.Services
                 MarkerCodes.ExtractCodes(line);
             }
         }
-
         public static async Task<bool> ExtractAssetDBandSetUpdateTime()
         {
             DebugPage.AppendLine("FileProcessor.ExtractAssetDBandSetUpdateTime");
@@ -62,6 +62,27 @@ namespace PGK.Services
             UpdatePage.appLastUpdateTime = refDate;
             DebugPage.AppendLine("FileProcessor.ExtractAssetDBandSetUpdateTime appLastUpdateTime: " + UpdatePage.appLastUpdateTime);
             return true;
+        }
+        public static string CreateRandomAppID()
+        {
+            int randValue;
+            char letter;
+            string str = "";
+            Random rand = new Random();
+            for (int i = 0; i < 8; i++)
+            {
+
+                // Generating a random number.
+                randValue = rand.Next(0, 26);
+
+                // Generating random character by converting
+                // the random number into character.
+                letter = Convert.ToChar(randValue + 65);
+
+                // Appending the letter to string.
+                str = str + letter;
+            }
+            return str;
         }
     } // END OF CLASS
 }

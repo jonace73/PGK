@@ -23,7 +23,6 @@ namespace PGK.Data
                 {
                     try
                     {
-                        // Signal app being from crash state
                         DebugPage.AppendLine("NodeDatabase.DBnodes");
                         if (File.Exists(dbPath))
                         {
@@ -111,7 +110,7 @@ namespace PGK.Data
         }
         public async Task<int> InsertNodeAsync(Node node)
         {
-            int numberInserted;
+            int numberInserted; 
             try
             {
                 numberInserted = await NodeConn.InsertAsync(node);
@@ -150,6 +149,7 @@ namespace PGK.Data
         }
         public async Task<int> SaveNodeAsync(Node node)
         {
+
             // Save nodes.
             int numberProessedNodes;
             try
@@ -196,6 +196,19 @@ namespace PGK.Data
             }
 
             return numberProessedNodes;
+        }
+        public Task<List<Node>> SearchAppIDAsync()
+        {
+            Task<List<Node>> nodes = null;
+            try
+            {
+                nodes = NodeConn.QueryAsync<Node>("SELECT * FROM [Node] WHERE LeafTag LIKE ?", UpdatePage.appIDforDB + "%");
+            }
+            catch (Exception ex)
+            {
+                DebugPage.AppendLine("NodeDatabase.SearchAppIDAsync Error: " + ex.Message);
+            }
+            return nodes;
         }
     }
 }

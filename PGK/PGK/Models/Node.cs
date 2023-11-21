@@ -4,6 +4,8 @@ using PGK.Views;
 using SQLite;
 using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Numerics;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Color = Xamarin.Forms.Color;
@@ -15,9 +17,10 @@ namespace PGK.Models
         public enum NodeType
         {
             Branch = 0b_0000_0000,  // 0
-            Answer = 0b_0000_0001,  // 1
+            AnswerAsText = 0b_0000_0001,  // 1
             SearchBar = 0b_0000_0010,  // 2
-            SearchResult = 0b_0000_0100  // 4
+            SearchResult = 0b_0000_0100,  // 4
+            AnswerAsImage = 0b_0000_1000  // 8
         }
 
         [PrimaryKey]
@@ -30,6 +33,7 @@ namespace PGK.Models
         public bool IsAnswerShown { get; set; }
         public int LargeFramePadding { get; set; }
         public NodeType nodeType { get; set; }
+
         public static int topMargin = 5;
 
         //============================= CREATION =========================================
@@ -55,30 +59,16 @@ namespace PGK.Models
                 return CreateSearchBarFrame();
             }
 
-            // Create retransmit and other nodeFrame
-            Span keywordSpan;
-            if (Keyword.Equals(UpdatePage.retransmitKeyword))
-            {
-                keywordSpan = new Span { Text = Keyword + MarkerCodes.keyDelimiter, TextColor = Color.Red, FontAttributes = FontAttributes.Bold };
-            }
-            else
-            {
-                keywordSpan = new Span { Text = Keyword + MarkerCodes.keyDelimiter, TextColor = Color.LightYellow, FontAttributes = FontAttributes.Bold };
-            }
-            return CreateAllTypeNodeFrame(keywordSpan);
+            // Create other types of tabs
+            return CreateAllTypeNodeFrame();
         }
-        public Frame CreateAllTypeNodeFrame(Span keywordSpan)
+        public Frame CreateAllTypeNodeFrame()
         {
             //DebugPage.AppendLine("Node.CreateAllTypeNodeFrame");
 
-            // Answer label is invisible.
-            // This is used for QUICK search of the tapped header to activate its answer,
-            // AND for QUICK sorting nodes to display
-            Label keywordLabel = new Label
-            {
-                Text = Keyword + MarkerCodes.keyDelimiter,
-                IsVisible = false
-            };
+            // Create retransmit and other nodeFrame
+            Span keywordSpan = new Span { Text = Keyword + MarkerCodes.keyDelimiter, FontAttributes = FontAttributes.Bold };
+            keywordSpan.TextColor = Keyword.Equals(UpdatePage.retransmitKeyword) ? Color.Red : Color.LightYellow;
 
             // Create the header texts with different formats Node.keywordAdditionalDelimeter
             var formattedString = new FormattedString();
@@ -98,6 +88,15 @@ namespace PGK.Models
                 IsVisible = false
             };
 
+            // Answer label is invisible.
+            // This is used for QUICK search of the tapped header to activate its answer,
+            // AND for QUICK sorting nodes to display
+            Label keywordLabel = new Label
+            {
+                Text = Keyword + MarkerCodes.keyDelimiter,
+                IsVisible = false
+            };
+
             // Create Header stackLayout
             StackLayout headderLayout = new StackLayout
             {
@@ -108,7 +107,8 @@ namespace PGK.Models
             headderLayout.Children.Add(invisibleLeafTagLabel);
 
             // Create header frame that contains headderLayout
-            bool nodeColor = isGivenType(nodeType, NodeType.Answer) || isGivenType(nodeType, NodeType.SearchBar);
+            bool nodeColor = isGivenType(nodeType, NodeType.AnswerAsText) || isGivenType(nodeType, NodeType.SearchBar);
+            nodeColor = nodeColor || isGivenType(nodeType, NodeType.AnswerAsImage);
             Frame headerFrame = new Frame
             {
                 BorderColor = Color.Gray,
@@ -142,16 +142,20 @@ namespace PGK.Models
             };
             headerFrame.GestureRecognizers.Add(tapGestureRecognizer);//*/
 
-            // Answer label
-            Label answer = CreateAnswer();
-
             // Create stackLayout to enclose header and answer
             StackLayout innerLayout = new StackLayout
             {
                 Orientation = StackOrientation.Vertical
             };
             innerLayout.Children.Add(headerFrame);
-            innerLayout.Children.Add(answer);
+            if (isGivenType(nodeType, NodeType.AnswerAsImage))// answer as Image
+            {
+                innerLayout.Children.Add(CreateAnswerAsImage());
+            }
+            else // answer as Label
+            {
+                innerLayout.Children.Add(CreateAnswerAsLabel());
+            }
 
             // Create the outer frame with innerLayout inside
             Frame nodeFrame = new Frame
@@ -199,7 +203,7 @@ namespace PGK.Models
 
             return nodeFrame;
         }
-        private Label CreateAnswer()
+        private Label CreateAnswerAsLabel()
         {
             // Replace dash code by actual dash
             this.Answer = Answer.Replace(MarkerCodes.Dash[0], MarkerCodes.Dash[1]);
@@ -238,12 +242,28 @@ namespace PGK.Models
 
             return answer;
         }
+        private Image CreateAnswerAsImage()
+        {
+            string[] answerFromServer = Answer.Split(new string[] { MarkerCodes.imageSeparator }, StringSplitOptions.None);
+
+            DebugPage.AppendLine("Node.CreateAnswerAsImage imageHeight = " + answerFromServer[0]);//*/
+            Image imageAnswer = new Image
+            {
+                IsVisible = IsAnswerShown,
+                Aspect = Aspect.AspectFit,
+                VerticalOptions = LayoutOptions.Fill,
+                HorizontalOptions = LayoutOptions.Fill,
+                Source = new UriImageSource { CachingEnabled = false, Uri = new Uri(answerFromServer[1]) }// answerFromServer[1] = URI
+            };//*/
+
+            return imageAnswer;
+        }
         public static Node CreateRetransmitNode()
         {
             Node node = new Node();
             node.Keyword = UpdatePage.retransmitKeyword;
             node.Header = "Please click this node to download information cut due to connection error.";
-            node.nodeType = NodeType.Answer;
+            node.nodeType = NodeType.AnswerAsText; // retransmit node simply prompts for retransmission, i.e., it is an answer node
 
             return node;
         }
@@ -258,6 +278,21 @@ namespace PGK.Models
         }
 
         //============================= MISC =========================================
+        public static NodeType ExtractNodeType(string nodeType)
+        {
+            NodeType retType;
+            switch (nodeType)
+            {
+                case "0": retType = NodeType.Branch; break;
+                case "1": retType = NodeType.AnswerAsText; break;
+                case "2": retType = NodeType.SearchBar; break;
+                case "4": retType = NodeType.SearchResult; break;
+                case "8": retType = NodeType.AnswerAsImage; break;
+                default: retType = NodeType.AnswerAsText; break;
+            }
+
+            return retType;
+        }
         public static void SortNodes(ref List<Node> nodes)
         {
             nodes.Sort(new Comparison<Node>((x, y) => (x.Keyword.CompareTo(y.Keyword))));
@@ -277,9 +312,17 @@ namespace PGK.Models
             Frame nodeFrame = (Frame)innerLayout.Parent;
             nodeFrame.Padding = LargeFramePadding;
 
-            // Show answer Children[1]
-            Label answer = innerLayout.Children[1] as Label;
-            answer.IsVisible = IsAnswerShown;
+            // If the answer (innerLayout.Children[1]) is an image and to be shown
+            if (innerLayout.Children[1] is Image)
+            {
+                // Split Answer to extract URI
+                string[] imageAnswer = Answer.Split(new string[] { MarkerCodes.imageSeparator }, StringSplitOptions.None);
+                // This will PREPARE the frame height is image should be presented
+                innerLayout.Children[1].HeightRequest = IsAnswerShown ? Int32.Parse(imageAnswer[0]) : 0;
+            }
+
+            // Show answer innerLayout.Children[1] which could be Label or Image type
+            innerLayout.Children[1].IsVisible = IsAnswerShown;
 
             return true;
         }
@@ -295,7 +338,7 @@ namespace PGK.Models
         {
             wordToUse = wordToUse.ToLower();
             //DebugPage.AppendLine("wordToUse: " + wordToUse);
-            List<Node> keyNodes= new List<Node>();
+            List<Node> keyNodes = new List<Node>();
             List<Node> headerNodes = new List<Node>();
             foreach (Node node in allNodes)
             {
@@ -343,7 +386,8 @@ namespace PGK.Models
             DebugPage.AppendLine("Node.TapResponseCommon leafTag: " + leafTag);
 
             // Toggle Answer (and outermost frame) and save to DB; tappedNode.IsAnswerNode
-            if (isGivenType(tappedNode.nodeType, NodeType.Answer))
+            bool truth = isGivenType(tappedNode.nodeType, NodeType.AnswerAsText) || isGivenType(tappedNode.nodeType, NodeType.AnswerAsImage);
+            if (truth) // Answer
             {
                 await tappedNode.ToggleAnswer(tappedHeaderFrame);
 
@@ -370,10 +414,10 @@ namespace PGK.Models
             // Set this node as common 
             string rootPath = ViewProcessor.ExtractPathRoot(this.LeafTag);
             string pathSeed;
-            if (isGivenType(nodeType, NodeType.Answer))
+            if (isGivenType(nodeType, NodeType.AnswerAsText))
             {
                 // Toggle IsAnswerShown
-                IsAnswerShown = isGivenType(nodeType, NodeType.Answer);
+                IsAnswerShown = isGivenType(nodeType, NodeType.AnswerAsText);
                 this.LargeFramePadding = IsAnswerShown ? 5 : 0;
 
                 // Save this node to rootPath's DB to REGISTER the change in LargeFramePadding
@@ -468,8 +512,7 @@ namespace PGK.Models
                 node.IsAnswerShown = false;//
                 node.nodeType = node.nodeType | NodeType.SearchResult; // Label as search result
                 node.LargeFramePadding = node.IsAnswerShown ? 5 : 0;
-                Span keywordSpan = new Span { Text = node.Keyword +MarkerCodes.keyDelimiter +" ", TextColor = Color.LightYellow, FontAttributes = FontAttributes.Bold };
-                Frame frame = node.CreateAllTypeNodeFrame(keywordSpan);
+                Frame frame = node.CreateAllTypeNodeFrame();
                 HomePage.scratchNodeFrameDB.Add(frame);
             }
 
@@ -486,6 +529,6 @@ namespace PGK.Models
 
             return allNodes.Count;
         }
-        
+
     }// END CLASS
 }

@@ -10,7 +10,8 @@ namespace PGK.Services
 
         public static string[] verseMarker, headerMarker, answerMarker, targetMarker, chapterMarker, sectionMarker, subSectionMarker;
         public static string[] biblioMarker, promptMarker, weblink, apostrophe;
-        public static string[] proMarker, conMarker;
+        public static string[] cathMarker, nonMarker, cathKeyword, nonKeyword, bold;
+        public static string notBoldMarker, imageSeparator;
 
         // NOTE: linkMarker marks \LinkTo. However, after disassembling the link the output MUST be delimited by linkOutMarker
         public static string[] linkMarker, linkOutMarker; 
@@ -25,9 +26,12 @@ namespace PGK.Services
             int indexStart = preCode.Length;
             string[] codePair = line.Substring(indexStart).Split('=');
             switch (codePair[0])
-            {//
+            {   // ===================================================================================
+                // =============== ALL cases MUST be IDENTICAL to those in Command.tex ===============
+                // ===================================================================================
                 case "serverDBdelimiter": serverDBdelimiter = char.Parse(codePair[1]); break;
                 case "leafKeySeparator": leafKeySeparator = char.Parse(codePair[1]); break;
+                case "imageSeparator": imageSeparator = codePair[1]; break;
                 case "dbDelimiter": dbDelimiter = codePair[1]; break;
                 case "termSeparator": termSeparator = codePair[1]; break;
                 case "singleNewLine": singleNewLine = codePair[1]; break;
@@ -49,8 +53,12 @@ namespace PGK.Services
                 case "biblioMarker": biblioMarker = translateAcode(codePair[1]); break;
                 case "promptMarker": promptMarker = translateAcode(codePair[1]); break;
                 case "weblink": weblink = translateAcode(codePair[1]); break;
-                case "Con": conMarker = translateAcode(codePair[1]); break;
-                case "Pro": proMarker = translateAcode(codePair[1]); break;
+                case "Non": nonMarker = translateAcode(codePair[1]); break;
+                case "Cath": cathMarker = translateAcode(codePair[1]); break;
+                case "CathKW": cathKeyword = translateAcode(codePair[1]); break;
+                case "NonKW": nonKeyword = translateAcode(codePair[1]); break;
+                case "Bold": bold = translateAcode(codePair[1]); break;
+                case "NoLabel": notBoldMarker = codePair[1]; break;
                 case "ff": ff = new string[]{codePair[1], "ff"}; break;
                 case "fl": fl = new string[] { codePair[1], "fl" }; break;
                 case "fi": fi = new string[] { codePair[1], "fi" }; break;

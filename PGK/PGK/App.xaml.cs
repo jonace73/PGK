@@ -70,6 +70,10 @@ namespace PGK
 
             // Otherwise
             UpdatePage.UpdateFromServer();
+
+            // Upload location to server. NOTE: this method is NOT waited. If it is, phone hangs up.
+            UpdatePage.uploadUserLocationToServer();
+
         }
         public static async Task<bool> CommonOnCreate()
         {
@@ -81,7 +85,7 @@ namespace PGK
             // Set flag not to return again
             App.isFirstCreation = false;
 
-            // Download from Asset
+            // Extract from Asset
             UpdatePage.appLastCheckTime = DateTime.UtcNow;
             UpdatePage.isUpdateOnGoing = true;
             UpdatePage.isTransmissionInError = false;
@@ -97,17 +101,23 @@ namespace PGK
 
             // Extract nodes from asset, SET last update time, AND set 
             await FileProcessor.ExtractAssetDBandSetUpdateTime();
-            // This contains the code: NodeDatabase.DBnodes.InsertNodeAsync() which can alter *** NodeDatabase.isFromCrash ***
+            // This contains the code: NodeDatabase.DBnodes.InsertNodeAsync() which can EVENTUALLY alter *** NodeDatabase.isFromCrash ***
+            // If from CRASH, the DB is destroyed then regenerated from Asset, i.e., last update time is based on Asset
 
-            // If app is from being crashed, download from server
+            // Check for crash
             if (NodeDatabase.isFromCrash)
             {
-                // NodeDB will indicate from the last line if the app is coming from a crash NodeDatabase.isFromCrash
-                await UpdatePage.DownloadFromServer();
+                DebugPage.AppendLine("App.CommonOnCreate: From crash");
             }
+
+            // If app had crashed, download from server 
+            await UpdatePage.DownloadFromServer();
 
             // Terminate logo rotation and leave update page
             UpdatePage.isUpdateOnGoing = false;
+
+            // CREATE then add appID to DB to be used during OnResumeCommon() for update of DB            
+            await UpdatePage.AddAppIDtoDB();
 
             // Make VS happy
             return true;

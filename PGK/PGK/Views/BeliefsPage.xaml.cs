@@ -10,7 +10,7 @@ namespace PGK.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class BeliefsPage : ContentPage
     {
-        static string rootName = "Beliefs";
+        public static string rootName = "Beliefs";
         public static bool useScratchDB = false;
         public static List<Frame> scratchNodeFrameDB = new List<Frame>();
         public static bool showBackArrow = false;

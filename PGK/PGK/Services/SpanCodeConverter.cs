@@ -7,25 +7,24 @@ using System.Globalization;
 using System.Windows.Input;
 using Xamarin.Forms;
 using static PGK.Models.Node;
+using static System.Collections.Specialized.BitVector32;
 
 namespace PGK.Services
 {
     public class SpanCodeConverter : IValueConverter
-    {
-        //=============== ADD new action/command name HERE
+    {        
         public enum Action
         {
-            Prompt, Weblink, NodeLink, Pro, Con, Text // Text MUST be last
+            // =============== ADD new action/command name HERE ===============
+            // =============== MAKE CHANGES BELOW AS WELL ===============
+            Prompt, Weblink, NodeLink, Cath, Non, cathKeyword, nonKeyword, Bold, Text // Text MUST be last
         }
-
-        //=============== ADD new markers HERE
-        public static string[] startingDelimiters = { MarkerCodes.promptMarker[0], MarkerCodes.weblink[0], MarkerCodes.linkOutMarker[0], MarkerCodes.proMarker[0], MarkerCodes.conMarker[0] };
-        public static string[] midDelimiters = { MarkerCodes.promptMarker[1], MarkerCodes.weblink[1], MarkerCodes.linkOutMarker[1], "", "" };
-        public static string[] endingDelimiters = { MarkerCodes.promptMarker[2], MarkerCodes.weblink[2], MarkerCodes.linkOutMarker[2], MarkerCodes.proMarker[1], MarkerCodes.conMarker[1] };
-
-        //=============== ADD new action/command name HERE
-        public static Action[] actionTypes = { Action.Prompt, Action.Weblink, Action.NodeLink, Action.Pro, Action.Con };
-        //              actionTypes MUST exactly correspond to the delimiters
+        public static string[] startingDelimiters = { MarkerCodes.promptMarker[0], MarkerCodes.weblink[0], MarkerCodes.linkOutMarker[0], MarkerCodes.cathMarker[0], MarkerCodes.nonMarker[0], MarkerCodes.cathKeyword[0], MarkerCodes.nonKeyword[0], MarkerCodes.bold[0]};
+        public static string[] midDelimiters =      { MarkerCodes.promptMarker[1], MarkerCodes.weblink[1], MarkerCodes.linkOutMarker[1], "", "", "", "", "" };
+        public static string[] endingDelimiters =   { MarkerCodes.promptMarker[2], MarkerCodes.weblink[2], MarkerCodes.linkOutMarker[2], MarkerCodes.cathMarker[1], MarkerCodes.nonMarker[1], MarkerCodes.cathKeyword[1], MarkerCodes.nonKeyword[1], MarkerCodes.bold[1]};
+        public static Action[] actionTypes =        {      Action.Prompt,               Action.Weblink,         Action.NodeLink,              Action.Cath,               Action.Non,               Action.cathKeyword,         Action.nonKeyword,         Action.Bold};
+        // =============== actionTypes MUST exactly correspond to the delimiters ===============
+        // =============== Add a case in CreateSpan() and OR in StringSection() ===============
         public SpanCodeConverter() { }
 
         public object Convert(object value, Type targetType, object sourceNode, CultureInfo culture)
@@ -33,8 +32,26 @@ namespace PGK.Services
             var formatted = new FormattedString();
 
             // In CreateSpan, a span is added for each breaking component which if a link will have gesture recognizer
-            foreach (var item in ProcessString(value as string, sourceNode as string))
+            foreach (StringSection item in ProcessString(value as string, sourceNode as string))
+            {
+                // IF there is #NB between #CT and TC# THEN create span for the included string 
+                if (item.hasNDlabel())
+                {
+                    // Remove #NB inside THEN color text
+                    formatted.Spans.Add(CreateSpanAfterNB(item));
+                    continue;
+                }
+
+                // ELSE: if for Debate add Cath or Non label, i.e., IF has Cath or Non THEN add them
+                if (item.IsDebateLabel())
+                {
+                    // Add colored debate label inside
+                    formatted.Spans.Add(CreateDebateLabel(item.action));
+                }
+                
+                // THEN append text processed according to action type except after #NB
                 formatted.Spans.Add(CreateSpan(item));
+            }
 
             return formatted;
         }
@@ -50,25 +67,88 @@ namespace PGK.Services
             }
             return null;
         }
+        private Span CreateDebateLabel(Action action)
+        {
+            var span = new Span();
+
+            // If Cath
+            if (action == Action.Cath)
+            {
+                //DebugPage.AppendLine("SpanCodeConverter.DebateLabel Cath");
+                span.Text = "Cath: ";
+                span.TextColor = Color.Teal;
+                span.FontAttributes = FontAttributes.Bold;
+                return span;
+            }
+
+            // If Non
+            if (action == Action.Non)
+            {
+                //DebugPage.AppendLine("SpanCodeConverter.DebateLabel Non");
+                span.Text = "Non: ";
+                span.TextColor = Color.Brown;
+                span.FontAttributes = FontAttributes.Bold;
+            }
+
+            return span;
+        }
+        private Span CreateSpanAfterNB(StringSection section)
+        {
+            var span = new Span();
+            // Remove #NB
+            span.Text = section.Text.Substring(MarkerCodes.notBoldMarker.Length);
+            span.TextColor = section.action == Action.Cath ? Color.Teal : Color.Brown;
+            return span;
+        }
         private Span CreateSpan(StringSection section)
         {
             var span = new Span();
 
-            // If PRO
-            if (section.action == Action.Pro)
+            // If Bold
+            if (section.action == Action.Bold)
             {
-                //DebugPage.AppendLine("SpanCodeConverter.CreateSpan Pro: " + section.Text);
+                //DebugPage.AppendLine("SpanCodeConverter.CreateSpan Cath: " + section.Text);
+                span.Text = section.Text;
+                span.TextColor = Color.Black;
+                span.FontAttributes = FontAttributes.Bold;
+                return span;
+            }
+
+            // If Cath
+            if (section.action == Action.Cath)
+            {
+                //DebugPage.AppendLine("SpanCodeConverter.CreateSpan Cath: " + section.Text);
                 span.Text = section.Text;
                 span.TextColor = Color.Teal;
                 return span;
             }
 
+            // If Cath as Keyword
+            if (section.action == Action.cathKeyword)
+            {
+                //DebugPage.AppendLine("SpanCodeConverter.CreateSpan Cath: " + section.Text);
+                span.Text = section.Text;
+                span.TextColor = Color.Teal;
+                span.FontAttributes = FontAttributes.Bold;
+                return span;
+            }
+
             // If CON
-            if (section.action == Action.Con)
+            if (section.action == Action.Non)
             {
                 //DebugPage.AppendLine("SpanCodeConverter.CreateSpan Con: " + section.Text);
                 span.Text = section.Text;
                 span.TextColor = Color.Brown;
+                return span;
+            }
+
+            // If CON as Keyword
+            if (section.action == Action.nonKeyword)
+            {
+                //DebugPage.AppendLine("SpanCodeConverter.CreateSpan Con: " + section.Text);
+                span.Text = section.Text;
+                span.TextColor = Color.Brown;
+                span.FontAttributes = FontAttributes.Bold;
                 return span;
             }
 
@@ -207,14 +287,12 @@ namespace PGK.Services
                 this.action = actionTypes[indexAction];
 
                 // Switch case
-                if (action == Action.Pro || action == Action.Con)
+                if (action == Action.Cath || action == Action.Non || action == Action.cathKeyword || action == Action.nonKeyword || action == Action.Bold)
                 {
-                    //bool isQuickTip = sourceNode.IndexOf("Quick tip") > -1;
-                    //if (isQuickTip) DebugPage.AppendLine("SpanCodeConverter.StringSection itemValue: " + itemValue + " indexAction: " + indexAction);
-                    
                     Text = itemValue;
                     return;
                 }
+
                 if (action == Action.Prompt)
                 {
                     Text = itemValue.Substring(0, itemValue.IndexOf(midDelimiters[0]));// verse number only
@@ -238,6 +316,22 @@ namespace PGK.Services
                     Text = itemValue.Substring(indexAfterMid);// The one to be tapped
                     return;
                 }
+            }
+            public bool hasNDlabel()
+            {
+                // NOTE: NB only appears with Cath and Non
+                // Check if #NB is present, regardless of debater type, i.e., Cath or Non
+                int lengthNB = MarkerCodes.notBoldMarker.Length;
+                if (Text == null || Text.Length < lengthNB) { return false; }
+
+                string nonBold = Text.Substring(0, lengthNB);
+                return nonBold.Equals(MarkerCodes.notBoldMarker);
+
+            }
+            public bool IsDebateLabel()
+            {
+                // Check if the words "Cath:" or "Non:" should be added
+                return action == Action.Cath || action == Action.Non;
             }
         }
 
@@ -263,7 +357,7 @@ namespace PGK.Services
 
                 // Set node as shown
                 string pathSeed;
-                if (isGivenType(tappedNode.nodeType, NodeType.Answer))
+                if (isGivenType(tappedNode.nodeType, NodeType.AnswerAsText))
                 {
                     // Toggle IsAnswerShown
                     tappedNode.IsAnswerShown = true;

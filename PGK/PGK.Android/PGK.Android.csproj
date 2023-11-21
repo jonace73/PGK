@@ -140,6 +140,5 @@
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\BackArrow.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>

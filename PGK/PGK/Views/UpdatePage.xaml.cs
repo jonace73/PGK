@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -16,23 +18,18 @@ namespace PGK.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class UpdatePage : ContentPage
     {
+        public static string rootName = "Update";
         public static bool isDownloadFromServer = true;
         public static bool isUpdateOnGoing = true;
         public static bool isTransmissionInError = false;
         public static string retransmitKeyword = "Retransmit";
-        public static string appID;
-        public static string URI = "https://whizkod.com/PGK/HttpPHP/RxPost.php";
-        public static string AppID
-        {
-            get
-            {
-                if (appID == null)
-                {
-                    appID = CreateRandomAppID();
-                }
-                return appID;
-            }
-        }
+
+        // NOTE: No need to change anything when migrating to anothe server host
+        public static string URI = "https://whizkod.com/PGK/HttpPHP/RxAppRequest.php";
+
+        // Any changes in    appIDforDB   must be reflected to Web\HttpPHP\Functions.php: isForappID() and extractAppID()
+        public static string appIDforDB = "appID";
+
         // Month is ONE-BASED
         public static DateTime appLastUpdateTime = new DateTime(2023, 01, 01, 00, 00, 00);
         public static DateTime appLastCheckTime = new DateTime(2023, 01, 01, 00, 00, 00);
@@ -53,7 +50,7 @@ namespace PGK.Views
             // If not downloading from server return
             if (!isDownloadFromServer) return;
 
-            // Download from server
+            // Download from server 
             try
             {
                 await DownloadFromServer();
@@ -96,31 +93,77 @@ namespace PGK.Views
         {
             // Send message
             DebugPage.AppendLine("UpdatePage.DownloadFromServer appLastUpdateTime: " + DateTimeToStringOneBased(appLastUpdateTime));
-            using (var client = new HttpClient())
+            try
             {
-                // Create a new post
-                var novoPost = new Post
+                using (var client = new HttpClient())
                 {
-                    signalType = "Update",
-                    lastClientUpdateDate = DateTimeToStringOneBased(appLastUpdateTime)
-                };
+                    // Create a new post
+                    var novoPost = new Post();
 
-                // create the request content and define Json  
-                var json = JsonConvert.SerializeObject(novoPost);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                    // create the request content and define Json  
+                    var json = JsonConvert.SerializeObject(novoPost);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                //  send a POST request
-                var result = await client.PostAsync(URI, content);
+                    //  send a POST request
+                    var result = await client.PostAsync(URI, content);
 
-                // on error throw a exception  
-                result.EnsureSuccessStatusCode();
+                    // on error throw a exception  
+                    result.EnsureSuccessStatusCode();
 
-                // handling the answer  
-                var resultString = await result.Content.ReadAsStringAsync();
-                Post post = JsonConvert.DeserializeObject<Post>(resultString);
+                    // handling the answer  
+                    var resultString = await result.Content.ReadAsStringAsync();
+                    Post post = JsonConvert.DeserializeObject<Post>(resultString);
 
-                // Process post
-                await ProcessReceivedPost(post);
+                    // Process post
+                    await ProcessReceivedPost(post);//*/
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugPage.AppendLine("UpdatePage.DownloadFromServer: " + ex.Message);
+            }
+
+            return 0;
+        }
+        public static async Task<int> uploadUserLocationToServer()
+        {
+            // Send message
+            DebugPage.AppendLine("UpdatePage.uploadUserToServer");
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    // Create a new post
+                    var novoPost = new Post();
+
+                    // Add appID and location
+                    string appID = await ExtractAppIDFromDB();
+                    novoPost.LeafTag = appIDforDB + MarkerCodes.leafSeparator + appID;
+                    Location location = await GetCurrentLocation();
+                    novoPost.latitude = location.Latitude;
+                    novoPost.longitude = location.Longitude;
+
+                    // create the request content and define Json  
+                    var json = JsonConvert.SerializeObject(novoPost);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                    //  send a POST request
+                    var result = await client.PostAsync(URI, content);
+
+                    // on error throw a exception  
+                    result.EnsureSuccessStatusCode();
+
+                    // handling the answer  
+                    var resultString = await result.Content.ReadAsStringAsync();
+                    Post post = JsonConvert.DeserializeObject<Post>(resultString);
+
+                    // Display result numberNodes
+                    DebugPage.AppendLine("UpdatePage.uploadUserToServer is user encoded: " +(post.numberNodes == 1));
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugPage.AppendLine("UpdatePage.uploadUserToServer: " + ex.Message);
             }
 
             return 0;
@@ -183,20 +226,14 @@ namespace PGK.Views
             DebugPage.AppendLine("UpdatePage.ProcessParameters");
             switch (node.Keyword)
             {
-                case "URIchange": ChangeURI(node.Header); break;
-                case "Testing": Test(node); break;
+                case "Testing": UpdateParameters(node); break;
             }
-            
+
         }
-        static void Test(Node node)
+        static void UpdateParameters(Node node)
         {
             DebugPage.AppendLine("UpdatePage.Test");
             // LATER
-        }
-        static void ChangeURI(string novoURI)
-        {
-            DebugPage.AppendLine("UpdatePage.ChangeURI URInew: " + novoURI);
-            URI = novoURI;
         }
         public static string DateTimeToStringOneBased(DateTime dateTime)
         {
@@ -213,26 +250,50 @@ namespace PGK.Views
 
             return new DateTime(Int32.Parse(days[0]), Int32.Parse(days[1]), Int32.Parse(days[2]), Int32.Parse(times[0]), Int32.Parse(times[1]), Int32.Parse(times[2]));
         }
-        public static string CreateRandomAppID()
+        public async static Task<Location> GetCurrentLocation()
         {
-            int randValue;
-            char letter;
-            string str = "";
-            Random rand = new Random();
-            for (int i = 0; i < 8; i++)
+            try
             {
-
-                // Generating a random number.
-                randValue = rand.Next(0, 26);
-
-                // Generating random character by converting
-                // the random number into character.
-                letter = Convert.ToChar(randValue + 65);
-
-                // Appending the letter to string.
-                str = str + letter;
+                CancellationTokenSource cts;
+                var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
+                cts = new CancellationTokenSource();
+                return await Geolocation.GetLocationAsync(request, cts.Token);
             }
-            return str;
+            catch (FeatureNotSupportedException fnsEx)
+            {
+                DebugPage.AppendLine("Handle not supported on device exception: " + fnsEx.Message);
+            }
+            catch (FeatureNotEnabledException fneEx)
+            {
+                DebugPage.AppendLine("Handle not enabled on device exception: " + fneEx.Message);
+            }
+            catch (PermissionException pEx)
+            {
+                DebugPage.AppendLine("Handle permission exception: " + pEx.Message);
+            }
+            catch (Exception ex)
+            {
+                DebugPage.AppendLine("Unable to get location: " + ex.Message);
+            }
+            return null;
+        }
+        public static async Task<string> AddAppIDtoDB()
+        {
+            string appID = FileProcessor.CreateRandomAppID();
+            Node node = new Node();
+            node.LeafTag = appIDforDB + MarkerCodes.leafSeparator + appID;
+            await NodeDatabase.DBnodes.InsertNodeAsync(node);
+            return appID;
+        }
+        public static async Task<string> ExtractAppIDFromDB()
+        {
+            string appID = string.Empty;
+            List<Node> allNodes = await NodeDatabase.DBnodes.SearchAppIDAsync();
+            foreach (Node node in allNodes)
+            {
+                appID = ViewProcessor.ExtractKeyword(node.LeafTag);
+            }
+            return appID;
         }
     } // END class
 }

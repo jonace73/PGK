@@ -35,7 +35,7 @@
 %\fi=#xi#
 \newcommand{\fI}{\begin{switch}{\value{intentioncounter}}\case{1}{fi}\case{2}{fi}\case{3}{\#xi\#}\end{switch}}
 
-%\singleQuote=\SQ
+%\singleQuote=#SQ
 \newcommand{\SQ}{\begin{switch}{\value{intentioncounter}}\case{1}{'}\case{2}{'}\case{3}{\#SQ}\end{switch}}
 
 %\doubleQuote=#DQ
@@ -44,10 +44,16 @@
 %========== Two or Three markers ==========
 %\linkOutMarker=#NK,L#K,KN#
 %\linkMarker=#LK,M#L,KL#
-\newcommand{\LinkTo}[2]{\begin{switch}{\value{intentioncounter}}\case{1}{\hyperlink{#1}{#2}}\case{2}{\hyperlink{#1}{#2}}\case{3}{\#LK\ #1\ M\#L\ #2\ KL\#}\end{switch}}
+\newcommand{\LinkTo}[2]{\begin{switch}{\value{intentioncounter}}\case{1}{\hyperlink{#1}{#2}}\case{2}{\hyperlink{#1}{#2}}\case{3}{#2}\end{switch}}
 
 %\targetMarker=#TR,M#T,RT#
-\newcommand{\Target}[2]{\begin{switch}{\value{intentioncounter}}\case{1}{\hypertarget{#1}{} \colorbox{Yellow}{#2}}\case{2}{\hypertarget{#1}{} \colorbox{Yellow}{#2}}\case{3}{\#TR\ #1\ M\#T\ #2\ RT\#}\end{switch}}
+\newcommand{\Target}[2]{\begin{switch}{\value{intentioncounter}}\case{1}{\hypertarget{#1}{} \colorbox{Yellow}{#2}}\case{2}{\hypertarget{#1}{} \colorbox{Yellow}{#2}}\case{3}{#2}\end{switch}}
+
+%\TabLink=xxx
+\newcommand{\TabLink}[2]{\begin{switch}{\value{intentioncounter}}\case{1}{\DblQt{\LinkTo{#1}{#2}}}\case{2}{\DblQt{\LinkTo{#1}{#2}}}\case{3}{\DblQt{#2}}\end{switch}}
+
+%\SectionLink=xxx
+\newcommand{\SectionLink}[2]{\begin{switch}{\value{intentioncounter}}\case{1}{\DblQt{\nameref{#1}}}\case{2}{\DblQt{\nameref{#1}}}\case{3}{\DblQt{#2}}\end{switch}}
 
 %\MyCite=#BB,BB#
 \newcommand{\MyCite}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{\cite{#1}}\case{2}{\cite{#1}}\case{3}{\#BB\ \RepAllStr{#1}\ BB\#}\end{switch}}
@@ -55,11 +61,36 @@
 %\verseMarker=#VR,RV#
 \newcommand{\Verse}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{[#1]}\case{2}{[\textcolor{red}{#1}]}\case{3}{\#VR\ #1\ RV\#}\end{switch}}
 
-%\Pro=#CT,TC#
-\newcommand{\Pro}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{\textcolor{teal}{#1}}\case{2}{\textcolor{teal}{#1}}\case{3}{\#CT#1TC\#}\end{switch}}
+%========== Catholic VS Non ==========
+%\Bold=#BL,LB#
+\newcommand{\Bold}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{\textbf{#1}}\case{2}{\textbf{#1}}\case{3}{\#BL#1LB\#}\end{switch}}
 
-%\Con=#PT,TP#
-\newcommand{\Con}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{\textcolor{brown}{#1}}\case{2}{\textcolor{brown}{#1}}\case{3}{\#PT#1TP\#}\end{switch}}
+%\Cath=#CT,TC#
+\newcommand{\Cath}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{\textcolor{teal}{\textbf{Cath:} #1}}\case{2}{\textcolor{teal}{\textbf{Cath:} #1}}\case{3}{\#CT#1TC\#}\end{switch}}
+
+%\NoLabel=#NB
+\newcommand{\NoLabel}{\#NB}
+
+%\CathNB=#CT,TC#
+\newcommand{\CathNB}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{\textcolor{teal}{#1}}\case{2}{\textcolor{teal}{#1}}\case{3}{\#CT{\NoLabel}#1TC\#}\end{switch}}
+
+%\CathIns=#CT,TC#
+\newcommand{\CathIns}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{#1}\case{2}{#1}\case{3}{TC\##1\#CT{\NoLabel}}\end{switch}}
+
+%\CathKW=#CB,BC#
+\newcommand{\CathKW}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{\textcolor{teal}{\textbf{#1}}}\case{2}{\textcolor{teal}{\textbf{#1}}}\case{3}{TC\#\#CB#1BC\#\#CT{\NoLabel}}\end{switch}}
+
+%\Non=#PT,TP#
+\newcommand{\Non}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{\textcolor{brown}{\textbf{Non:} #1}}\case{2}{\textcolor{brown}{\textbf{Non:} #1}}\case{3}{\#PT#1TP\#}\end{switch}}
+
+%\NonNB=#PT,TP#
+\newcommand{\NonNB}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{\textcolor{brown}{#1}}\case{2}{\textcolor{brown}{#1}}\case{3}{\#PT{\NoLabel}#1TP\#}\end{switch}}
+
+%\NonIns=#PT,TP#
+\newcommand{\NonIns}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{\textcolor{brown}{#1}}\case{2}{\textcolor{brown}{#1}}\case{3}{TP\##1\#PT{\NoLabel}}\end{switch}}
+
+%\NonKW=#PB,BP#
+\newcommand{\NonKW}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{\textcolor{brown}{\textbf{#1}}}\case{2}{\textcolor{brown}{\textbf{#1}}}\case{3}{TP\#\#PB#1BP\#\#PT{\NoLabel}}\end{switch}}
 
 %========== Header Answer ==========
 %\headerMarker=#HD,M#H,DH#
@@ -70,6 +101,12 @@
 
 %\answerMarker=#AN,NA#
 \newcommand{\Answer}{\begin{switch}{\value{intentioncounter}}\case{1}{\textcolor{blue}{Reply:}}\case{2}{\textcolor{blue}{Reply}:}\case{3}{\#AN}\end{switch}}
+
+% With or without ANS
+\newcommand{\BeginAns}[1]{\begin{switch}{\value{answercounter}}\case{1}{\Answer\ #1}\case{2}{}\end{switch}}
+\newcommand{\OtherAns}[1]{\begin{switch}{\value{answercounter}}\case{1}{#1}\case{2}{}\end{switch}}
+% Newline switch WRT answercounter
+\newcommand{\LineAns}[1]{\begin{switch}{\value{answercounter}}\case{1}{\newline}\case{2}{}\end{switch}}
 
 %End Answer
 \newcommand{\EndAnswer}{\begin{switch}{\value{intentioncounter}}\case{1}{}\case{2}{$\bigoplus$}\case{3}{NA\#}\end{switch}}
@@ -108,6 +145,7 @@
 %\dbDelimiter=,#DB#,
 %\serverDBdelimiter=$
 %\leafKeySeparator=-
+%\imageSeparator=#MG#
 
 %========== QUOTES ==========
 %\Dash=#DS
@@ -123,9 +161,10 @@
 % dz^*/dz
 \newcommand{\Dir}{\begin{switch}{\value{intentioncounter}}\case{1}{$dz^*/dz$}\case{2}{$dz^*/dz$}\case{3}{of z* with respect to z}\end{switch}}
 
-\newcommand{\TagLish}[2]{\begin{switch}{\value{languagecounter}}\case{1}{#1}\case{2}{#2}\end{switch}}
+% z*
+\newcommand{\ZComplex}{\begin{switch}{\value{intentioncounter}}\case{1}{$z^*$}\case{2}{$z^*$}\case{3}{z*}\end{switch}}
 
-\newcommand{\Update}[2]{\begin{switch}{\value{languagecounter}}\case{1}{\textcolor{orange}{#1}}\case{2}{\textcolor{orange}{#2}}\end{switch}}
+\newcommand{\TagLish}[2]{\begin{switch}{\value{languagecounter}}\case{1}{#1}\case{2}{#2}\case{3}{#1 \textcolor{blue}{#2}}\end{switch}}
 
 \newcommand{\MyTOC}{\begin{switch}{\value{intentioncounter}}\case{1}{\tableofcontents
 \newpage
@@ -133,6 +172,11 @@
 \newpage
 }\case{3}{}\end{switch}}
 
+\newcommand{\KeyW}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{#1}\case{2}{\colorbox{YellowGreen}{#1}}\case{3}{#1}\end{switch}}
 
+\newcommand{\New}[2]{\textcolor{blue}{\TagLish{#1}{#2}}}
 
+\newcommand{\DblDot}[1]{\"#1}
+
+\newcommand{\SubInfinity}[1]{\begin{switch}{\value{intentioncounter}}\case{1}{$#1_\infty$}\case{2}{$#1_\infty$}\case{3}{#1\&\#x221E;}\end{switch}}
 
