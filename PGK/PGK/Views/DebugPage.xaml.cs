@@ -4,14 +4,16 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Xamarin.Essentials;
 using PGK.Services;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
 
 namespace PGK.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class DebugPage : ContentPage
     {
-        public static bool isInDebug = false;//true false
-        static int nthDebugLine=0;
+        public static bool isInDebug = true;//true false
+        static int nthDebugLine = 0;
         static string debugText;
         public static string DebugText
         {
@@ -84,6 +86,29 @@ namespace PGK.Views
             else
             {
                 await DisplayAlert("Error:", "HeigthPerLine is not an integer.", "OK");
+            }
+        }
+        async void OnDeliberateCrash(object sender, EventArgs e)
+        {
+            bool isEnabled = await Analytics.IsEnabledAsync();
+            DebugPage.AppendLine("OnDeliberateCrash crash analytics isEnabled: " + isEnabled);
+            if (isEnabled)
+            {
+                Crashes.GenerateTestCrash();
+            }
+        }
+        async void OnReportPreviousCrash(object sender, EventArgs e)
+        {
+            bool isEnabled = await Analytics.IsEnabledAsync();
+            DebugPage.AppendLine("OnReportPreviousCrash crash analytics isEnabled: " + isEnabled);// Analytics.TrackEvent("OnAlarmsToServer clicked");
+            if (!isEnabled) return;
+
+            bool didAppCrash = await Crashes.HasCrashedInLastSessionAsync();
+            if (didAppCrash)
+            {
+                ErrorReport crashReport = await Crashes.GetLastSessionCrashReportAsync();
+                DebugPage.AppendLine("Last CrashReport: " + crashReport.StackTrace);
+                // Send this same report to WhizKod server
             }
         }
     } // END CLASS

@@ -2,13 +2,10 @@
 using Android.Content.PM;
 using Android.Runtime;
 using Android.OS;
-using PGK.Data;
-using System.IO;
-using PGK.Models;
 using PGK.Views;
-using System;
-using PGK.Services;
-using System.Threading.Tasks;
+using Microsoft.AppCenter;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
 
 namespace PGK.Droid
 {
@@ -20,6 +17,8 @@ namespace PGK.Droid
             DebugPage.AppendLine("MainActivity.OnCreate App.isFirstCreation:" + App.isFirstCreation);
 
             base.OnCreate(savedInstanceState);
+
+            AppCenter.Start("430d7146-d708-431f-a394-d37da2dee269", typeof(Analytics), typeof(Crashes));
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);

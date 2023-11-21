@@ -62,7 +62,7 @@ namespace PGK
 
             // If not time to update return
             TimeSpan timeDiff = DateTime.UtcNow - UpdatePage.appLastCheckTime;
-            if (timeDiff.Days < 1) // Days Seconds
+            if (timeDiff.Seconds < 1) // Days Seconds
             {
                 (Xamarin.Forms.Shell.Current as AppShell).LeaveUpdatePage();
                 return;

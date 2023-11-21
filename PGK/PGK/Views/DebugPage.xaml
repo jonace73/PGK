@@ -21,9 +21,11 @@
     <!-- Pad -->
     <StackLayout Orientation="Vertical" Margin="0">
         <StackLayout Orientation="Horizontal" Margin="0">
-            <Label Text="Height per line:"  Margin="5,5,5,0" FontSize="Medium"/>
-            <Editor x:Name="HeightPerLine" Placeholder ="1" Margin="5,5,5,0" />
-            <Button Text="Save" Clicked="OnSaveHeightPerLine" Margin="5" />
+            <Label Text="H"  Margin="2,2,5,0" FontSize="Medium"/>
+            <Editor x:Name="HeightPerLine" Placeholder ="1" Margin="2,2,5,0" />
+            <Button Text="Save" Clicked="OnSaveHeightPerLine" Margin="2,2,5,0" />
+            <Button Text="Crash" Clicked="OnDeliberateCrash" Margin="2,2,5,0" />
+            <Button Text="Report" Clicked="OnReportPreviousCrash" Margin="2,2,5,0" />
         </StackLayout>
         <ScrollView>
             <Editor  x:Name="DebuggingOutputs" Text="" IsReadOnly="true" AutoSize="TextChanges" />
