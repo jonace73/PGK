@@ -24,8 +24,6 @@ namespace PGK.iOS
             global::Xamarin.Forms.Forms.Init();
             LoadApplication(new App());
 
-            AppCenter.Start("55b32f93-2a78-49b6-ad5b-6e70f0896735", typeof(Analytics), typeof(Crashes));
-
             return base.FinishedLaunching(app, options);
         }        
         public override async void OnActivated(UIApplication uiApplication)

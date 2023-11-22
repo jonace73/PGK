@@ -10,6 +10,7 @@ namespace PGK.iOS.Services
     {
         public void MakeToast(string txt)
         {
+
         }
     }
 }

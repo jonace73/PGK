@@ -3,10 +3,11 @@ using Xamarin.Forms;
 using PGK.Services;
 using PGK.Views;
 using System;
-using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 using PGK.Data;
+using Microsoft.AppCenter;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
 
 namespace PGK
 {
@@ -39,6 +40,7 @@ namespace PGK
         }
         protected override void OnStart()
         {
+            AppCenter.Start("android=430d7146-d708-431f-a394-d37da2dee269;", typeof(Analytics), typeof(Crashes));
         }
         protected override void OnSleep()
         {
