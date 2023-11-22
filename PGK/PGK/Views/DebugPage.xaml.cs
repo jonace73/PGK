@@ -109,6 +109,7 @@ namespace PGK.Views
             if (didAppCrash)
             {
                 ErrorReport crashReport = await Crashes.GetLastSessionCrashReportAsync();// This DOESN'T work
+                // No report even in Diagnostics > Issues > Crashes
                 DebugPage.AppendLine("DebugPage.Last CrashReport: " + crashReport.StackTrace);
                 // Send this same report to WhizKod server
             }
