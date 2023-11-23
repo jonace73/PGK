@@ -6,6 +6,7 @@ using Xamarin.Essentials;
 using PGK.Services;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
+using System.Collections.Generic;
 
 namespace PGK.Views
 {
@@ -95,8 +96,15 @@ namespace PGK.Views
             if (isEnabled)
             {
                 DebugPage.AppendLine("DebugPage.OnDeliberateCrash");
-                DependencyService.Get<ICrash>().MakeToast("Called from OnDeliberateCrash");
-                //Crashes.GenerateTestCrash();
+                try
+                {
+                    DependencyService.Get<ICrash>().MakeToast("Called from OnDeliberateCrash");
+                    //Crashes.GenerateTestCrash(); // This method is said to WORK ONLY IN DEBUG MODE
+                }
+                catch (Exception ex)
+                {
+                    Crashes.TrackError(ex, new Dictionary<string, string>() { { "IsSubscribed", "true" } });
+                }
             }
         }
         async void OnReportPreviousCrash(object sender, EventArgs e)
