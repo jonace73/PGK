@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,6 +30,11 @@ namespace PGK.Views
 
         // Any changes in    appIDforDB   must be reflected to Web\HttpPHP\Functions.php: isForappID() and extractAppID()
         public static string appIDforDB = "appID";
+
+        // Attach this info to email
+        public static string appIDforTesting = null;
+        public static double longitudeForTesting = 0.0;
+        public static double latitudeForTesting = 0.0;
 
         // Month is ONE-BASED
         public static DateTime appLastUpdateTime = new DateTime(2023, 01, 01, 00, 00, 00);
@@ -142,6 +148,14 @@ namespace PGK.Views
                     Location location = await GetCurrentLocation();
                     novoPost.latitude = location.Latitude;
                     novoPost.longitude = location.Longitude;
+
+                    // Attach this info to email
+                    if (DebugPage.isEmailTesting)
+                    {
+                        UpdatePage.appIDforTesting = appID;
+                        UpdatePage.latitudeForTesting = location.Latitude;
+                        UpdatePage.longitudeForTesting = location.Longitude;
+                    }
 
                     // create the request content and define Json  
                     var json = JsonConvert.SerializeObject(novoPost);
@@ -294,6 +308,10 @@ namespace PGK.Views
                 appID = ViewProcessor.ExtractKeyword(node.LeafTag);
             }
             return appID;
+        }
+        public static string AttachPhoneInfo()
+        {
+            return "?appID="+UpdatePage.appIDforTesting +"&Longitude=" + UpdatePage.longitudeForTesting + "&Latitude=" + UpdatePage.latitudeForTesting;
         }
     } // END class
 }

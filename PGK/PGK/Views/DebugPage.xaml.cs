@@ -6,7 +6,6 @@ using Xamarin.Essentials;
 using PGK.Services;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
-using System.Collections.Generic;
 
 namespace PGK.Views
 {
@@ -14,6 +13,7 @@ namespace PGK.Views
     public partial class DebugPage : ContentPage
     {
         public static bool isInDebug = true;//true false
+        public static bool isEmailTesting = true;//true false MAKE THIS FALSE AFTER TESTING APP ON MANY PHONES
         static int nthDebugLine = 0;
         static string debugText;
         public static string DebugText
@@ -96,15 +96,8 @@ namespace PGK.Views
             if (isEnabled)
             {
                 DebugPage.AppendLine("DebugPage.OnDeliberateCrash");
-                try
-                {
-                    DependencyService.Get<ICrash>().MakeToast("Called from OnDeliberateCrash");
-                    //Crashes.GenerateTestCrash(); // This method is said to WORK ONLY IN DEBUG MODE
-                }
-                catch (Exception ex)
-                {
-                    Crashes.TrackError(ex, new Dictionary<string, string>() { { "IsSubscribed", "true" } });
-                }
+                DependencyService.Get<ICrash>().MakeToast("Called from OnDeliberateCrash");
+                //Crashes.GenerateTestCrash();
             }
         }
         async void OnReportPreviousCrash(object sender, EventArgs e)

@@ -175,7 +175,6 @@ namespace PGK.Models
         {
             SearchBar searchBar = new SearchBar
             {
-                AutomationId = "SearchBar",
                 Placeholder = HomePage.placeholder,
                 PlaceholderColor = Color.Orange,
                 TextColor = Color.Orange,

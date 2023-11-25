@@ -8,6 +8,7 @@ using System.Windows.Input;
 using Xamarin.Forms;
 using static PGK.Models.Node;
 using static System.Collections.Specialized.BitVector32;
+using System.Threading.Tasks;
 
 namespace PGK.Services
 {
@@ -183,6 +184,15 @@ namespace PGK.Services
             // If LINK
             if (section.action == Action.Weblink)
             {
+                // AttachPhoneInfo if link for EMail. REMOVE THIS IN AFTER
+                if (DebugPage.isEmailTesting)
+                {
+                    if (section.Link.Contains("EMail"))
+                    {
+                        section.Link = AttachPhoneInfo(section.Link);
+                    }
+                }
+
                 span.GestureRecognizers.Add(new TapGestureRecognizer()
                 {
                     Command = webLinkCommand,
@@ -197,6 +207,12 @@ namespace PGK.Services
             span.Text = section.Text;
             span.TextColor = Color.Black;
             return span;
+        }
+        private string AttachPhoneInfo(string link)
+        {
+            if (UpdatePage.appIDforTesting == null) return link;
+
+            return link +UpdatePage.AttachPhoneInfo();
         }
 
         public IList<StringSection> ProcessString(string rawText, string sourceNode)
@@ -319,7 +335,7 @@ namespace PGK.Services
             }
             public bool hasNDlabel()
             {
-                // NOTE: NB only appears with Cath and Non
+                // NOTE: NB (Not Bold) only appears with Cath and Non
                 // Check if #NB is present, regardless of debater type, i.e., Cath or Non
                 int lengthNB = MarkerCodes.notBoldMarker.Length;
                 if (Text == null || Text.Length < lengthNB) { return false; }
