@@ -40,7 +40,7 @@ namespace PGK
         }
         protected override void OnStart()
         {
-            AppCenter.Start("android=7c529336-c84a-4797-b6e0-191a5e8f332a;", typeof(Analytics), typeof(Crashes));
+            //AppCenter.Start("android=7c529336-c84a-4797-b6e0-191a5e8f332a;", typeof(Analytics), typeof(Crashes));
             AppCenter.LogLevel = LogLevel.Verbose;// SDK emits all possible level of logs
         }
         protected override void OnSleep()
