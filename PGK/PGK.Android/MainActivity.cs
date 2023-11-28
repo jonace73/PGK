@@ -6,6 +6,7 @@ using PGK.Views;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
+using System;
 
 namespace PGK.Droid
 {
@@ -19,8 +20,7 @@ namespace PGK.Droid
             base.OnCreate(savedInstanceState);
 
             AppCenter.Start("7c529336-c84a-4797-b6e0-191a5e8f332a", typeof(Analytics), typeof(Crashes));
-            //AppCenter.Start("430d7146-d708-431f-a394-d37da2dee269", typeof(Analytics), typeof(Crashes));
-
+            
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App());
@@ -42,5 +42,6 @@ namespace PGK.Droid
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+        
     }
 }

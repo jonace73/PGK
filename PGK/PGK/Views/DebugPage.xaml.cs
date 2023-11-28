@@ -12,7 +12,7 @@ namespace PGK.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class DebugPage : ContentPage
     {
-        public static bool isInDebug = true;//true false
+        public static bool isInDebug = false;//true false
         public static bool isEmailTesting = true;//true false MAKE THIS FALSE AFTER TESTING APP ON MANY PHONES
         static int nthDebugLine = 0;
         static string debugText;
