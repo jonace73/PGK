@@ -40,14 +40,7 @@ namespace PGK
         }
         protected override void OnStart()
         {
-            // Event handler to log uncatched exception during crash
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             AppCenter.LogLevel = LogLevel.Verbose;// SDK emits all possible level of logs
-        }
-        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            Exception ex = ((Exception)e.ExceptionObject);
-            Crashes.TrackError(ex);
         }
         protected override void OnSleep()
         {
