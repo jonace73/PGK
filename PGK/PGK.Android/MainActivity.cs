@@ -25,16 +25,8 @@ namespace PGK.Droid
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App());
 
-            // Event handler to log uncatched exception during crash
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-
             // Call OnCreate common to Android and iOS
             await App.CommonOnCreate();
-        }
-        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            Exception ex = ((Exception)e.ExceptionObject);
-            Crashes.TrackError(ex);
         }
         protected override void OnResume()
         {
